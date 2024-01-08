@@ -1,6 +1,8 @@
-from main import Car, Direction, too_close_to_car_in_front
+from main import *
+from car_controller import *
+
 # Simple test cases for the adjust_speed function
-def test_adjust_speed():
+def test_too_close_to_car_in_front():
     test_cases = [
         (Car(0, 0, 0, Direction.E), Car(40, 0, 0, Direction.E), False),
 
@@ -26,6 +28,6 @@ def test_adjust_speed():
 
     print("All tests passed.")
 
-test_adjust_speed()
+test_too_close_to_car_in_front()
 
 
