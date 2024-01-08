@@ -1,69 +1,50 @@
-from enum import Enum
-import math
+from model import  *
+from car_controller import CarController
+from display import print_road
 
-# ISSUES: Mainly we need to account for dt better! the acceleration needs to account for dt, and some of the function need to take dt into account. cus with constant accel we are making the velocity jump up and down like crazy in like a tenth of a second.
+def step(CARS, red_light, dt):
+    # TODO: set light state first so cars can react to it
 
-# UNITS: 
-# time: seconds (s)
-Seconds = float
-# distance: meters (m)
-Meters = float
-# speed: meters per second (m/s)
-# acceleration: meters per second squared (m/s^2)
+    for car in CARS:
+        CarController.adjust_speed(car, car.car_in_front, red_light, MAX_SPEED, dt)
 
-
-# REFERENCE VALUES: 
-# ACCELERATION : For buses, accelerations of up to 1.0 m/s2 helps passengers move naturally inside the vehicle. For cars, a comfortable rate of acceleration is 1.5 to 2.0 m/s2
-# SPEED: Highway speeds in the US are typically around 26.8 m/s (60mph~100kph)
-# LENGTH: American cars range 3.5-5.5 meters in length (mini cooper to for f-150) with a width of 1.5-2 meters
-# DISTANCE: Safe distance behind car in front is around 1 meters for every km/h of speed -> 3.6 meters per m/s
-SPEED_BUFFER = 3.6  # meters per m/s
-
-# The minimum distance that must be kept when cars are stopped. This is to simulate the fact that cars are not bumper to bumper when stopped.
-CAR_MIN_DISTANCE = 5  # meters
+    for car in CARS:
+        CarController.update_position(car, dt)
 
 
-# Each direction will be represented by an integer
-class Direction(Enum):
-    N = 0  # North
-    E = 1  # East
-    S = 2  # South
-    W = 3  # West
+def run_stop_simulation():
+    # We are simulating just a stright road to a eternally red light
+    cars = generate_cars()
+    red_light = (600,0) 
 
-# A map to convert the direction to a tuple of (delta_x, delta_y)
-direction_map = {
-    Direction.N: (0, 1),
-    Direction.E: (1, 0),
-    Direction.S: (0, -1),
-    Direction.W: (-1, 0)
-}
+    time_steps = 100  # Total number of time steps for the simulation
+    dt = 1  # Time step duration
 
+    for i in range(time_steps):
+        step(cars, red_light,dt)
+        print_road(cars, red_light)
+  
+    print("Simulation complete.")
+          
+def generate_cars():
+    CARS = [
+        Car(-400, 0, 40, Direction.E),
+        Car(-300, 0, 10, Direction.E),
+        Car(-200, 0, 4, Direction.E),
+        Car(-10, 0, 1, Direction.E),
+        Car(100, 0, 0, Direction.E),
+        Car(300, 0, 1, Direction.E),
+        Car(330, 0, 20, Direction.E) 
+    ]
 
-class Car:
-    def __init__(self, x :Meters, y:Meters, speed :float, direction:Direction, length:Meters=5.2, acceleration=5, deceleration=5):
-        self.position = (x, y) 
-        self.speed = speed 
-        self.direction = direction
-        # length of the car in the direction of travel
-        self.length = length
-        # width of car perpendicular to direction of travel. We are only going to use this for rendering now, so I'm keeping it constant.
-        self.width  = Meters(1.7)
+    for i in range(len(CARS)):
+        if i > 0:
+            CARS[i].car_behind = CARS[i-1]
+        if i < len(CARS) - 1:
+            CARS[i].car_in_front = CARS[i+1]
 
-        # REVISIT LATER: We will be assuming a constant acceleration and deceleration to simplify the problem. This makes the gas and brake pedals effectively on/off buttons. 
-        self.acceleration = acceleration  
-        self.deceleration = deceleration
+    return CARS
 
-        # Keep track of the back position of the car cus that's what the driver behind will be worried about
-        delta_x, delta_y = direction_map[self.direction]
-        self.back_position = (self.position[0] - delta_x * self.length, 
-                              self.position[1] - delta_y * self.length)
-        
-        # The car behind me: keep this reference to tell the intersection to track that once I have passed
-        self.car_behind = None  
-        # Car in front: keep reference so we can measure its speed and position and know whether we need to brake as to no crash against them.
-        self.car_in_front = None
+# Note: To run the simulation, call run_stop_simulation()
+run_stop_simulation()
 
-   
-    def __str__(self):
-        return f"Car(pos={self.position}, speed={self.speed}, dir={self.direction})"
-    

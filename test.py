@@ -1,4 +1,4 @@
-from main import *
+from model import *
 from car_controller import *
 
 # Simple test cases for the adjust_speed function
