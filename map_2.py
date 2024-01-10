@@ -31,14 +31,14 @@ class Map:
         self.intersections: list[list[Intersection]] = [
             [
                 Intersection(i * edge_length, j * edge_length)
-                for i in range(nodes_per_row)
+                for j in range(nodes_per_row)
             ]
-            for j in range(nodes_per_row)
+            for i in range(nodes_per_row)
         ]
         self.nodes_per_row = nodes_per_row
         self.edge_length = edge_length
 
-    def set_traffic_light(self, x, y, traffic_light: TrafficLight):
+    def set_traffic_light(self, x: int, y: int, traffic_light: TrafficLight):
         self.intersections[x][y].set_traffic_light(traffic_light)
 
     # We will use closest_intersection to attach cars to their next intersection

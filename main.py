@@ -8,22 +8,36 @@ from map_2 import Map
 
 
 def run_simulation():
+    LEN = Meters(100)
     # Initialize the environment
-    m = Map(3, 100)
-    l1 = TrafficLight(0, 0, cycle_period=4)
-    l2 = TrafficLight(100, 0, cycle_period=4)
-    l3 = TrafficLight(200, 0, cycle_period=4)
-    m.set_traffic_light(0, 0, l1)
-    m.set_traffic_light(1, 0, l2)
-    m.set_traffic_light(2, 0, l3)
-    lights = [l1, l2, l3]
+    m = Map(3, LEN)
+
+    lights = []
+
+    def new_traffic_light(x, y):
+        l = TrafficLight(x, y, cycle_period=20, proportionX=0.5)
+        lights.append(l)
+        m.set_traffic_light(int(x / LEN), int(y / LEN), l)
+
+    new_traffic_light(0, 0)
+    new_traffic_light(100, 0)
+    new_traffic_light(200, 0)
 
     # We are simulating just a stright road to a eternally red light
 
     cars = [
         Car(1, 0, 0, Direction.E),
+        Car(10, 0, 20, Direction.E),
+        Car(20, 0, 20, Direction.E),
         Car(30, 0, 20, Direction.E),
+        Car(40, 0, 20, Direction.E),
+        Car(50, 0, 20, Direction.E),
+        Car(60, 0, 20, Direction.E),
+        Car(100, 0, 20, Direction.E),
+        Car(120, 0, 0, Direction.E),
+        Car(140, 0, 0, Direction.E),
         Car(160, 0, 1, Direction.E),
+        Car(180, 0, 0, Direction.E),
     ]
 
     # Connect cars to themselves ->TODO: this is bad now, should do it through the intersaction
@@ -38,27 +52,24 @@ def run_simulation():
         car.next_intersection = m.closest_intersection(
             car.position[0], car.position[1], car.direction
         )
-        print(
-            "INTERSECITON",
-            car.next_intersection.x,
-            car.next_intersection.y,
-        )
+
         # TODO: connect intersection to car as well
 
-    time_steps = 300  # Total number of time steps for the simulation
-    dt = 1  # Time step duration
-    last_time = time.time()
+    time_steps = 800  # Total number of time steps for the simulation
+    dt = 0.1  # Time step duration
+    last_time = int(time.time())
     for i in range(time_steps):
-        dt = time.time() - last_time
-        step(cars, lights, dt)
-        print_road(cars, (200, 0))
+        # dt = time.time() - last_time
+        last_time += dt
+        step(cars, lights, dt, last_time)
+        print_road(cars, (200, 0), lights)
 
     print("Simulation complete.")
 
 
-def step(CARS, lights, dt):
+def step(CARS, lights, dt, current_time):
     for light in lights:
-        LightController.tick_light(light, time.time())
+        LightController.tick_light(light, current_time)
 
     for car in CARS:
         CarController.adjust_speed(
@@ -70,6 +81,8 @@ def step(CARS, lights, dt):
 
     for car in CARS:
         CarController.update_position(car, dt)
+
+    # TODO: Move interections, car following who bla bla bla
 
 
 # Note: To run the simulation, call run_stop_simulation()

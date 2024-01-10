@@ -76,7 +76,7 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
 
     SAFETY_MARGIN = 2
     safe_distance = stopping_distance(car.speed, car.deceleration)
-    print(safe_distance, d - CAR_MIN_DISTANCE)
+
     return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_MARGIN
 
 
