@@ -1,11 +1,13 @@
 from math import ceil
 from model import *
 
+
+# Assuming 1d horizontal road for now
 def print_road(CARS, stop_position):
     # Length of each text character
     DX = Meters(20)
-    ROAD_WIDTH =  ceil(stop_position[0] / DX)
-    
+    ROAD_WIDTH = ceil(stop_position[0] / DX)
+
     # Print the road in a line of text
     for x in range(ROAD_WIDTH):
         # Check if there is a car at this position
@@ -22,4 +24,3 @@ def print_road(CARS, stop_position):
         else:
             print(".", end="")
     print("")
-    
