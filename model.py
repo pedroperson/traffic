@@ -75,6 +75,7 @@ class Car:
         self.car_behind = None
         # Car in front: keep reference so we can measure its speed and position and know whether we need to brake as to no crash against them.
         self.car_in_front = None
+        self.next_intersection = None
 
     def __str__(self):
         return f"Car(pos={self.position}, speed={self.speed}, dir={self.direction})"

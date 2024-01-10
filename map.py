@@ -1,4 +1,5 @@
 from traffic_light import TrafficLight
+from model import *
 
 
 class Map:
@@ -50,10 +51,10 @@ class Map:
 import random
 
 
-def generate_random_path(map, start=(0, 0), end=(1, 1)):
+def generate_random_path(map_x, map_y, start=(0, 0), end=(1, 1)):
     def dfs(pos, path):
         x, y = pos
-        if not (0 <= x < len(map) and 0 <= y < len(map[0])) or pos in path:
+        if not (0 <= x < map_x and 0 <= y < map_y) or pos in path:
             return
         path.append(pos)
         if pos == end:
@@ -77,11 +78,6 @@ def generate_random_path(map, start=(0, 0), end=(1, 1)):
     dfs(start, [])
     return random.choice(paths) if paths else None
 
-
-map = [[0.0] * 5] * 5
-
-
-generate_random_path(map, (4, 4), (0, 3))
 
 import matplotlib.pyplot as plt
 
@@ -114,7 +110,9 @@ def display_map(map, path, cars):
     plt.show()
 
 
-map = Map(5)
-path = generate_random_path(map.roads)
-cars = [(1, 1), (2, 2), (3, 3)]
-display_map(map, path, cars)
+# print(generate_random_path(5, 5, (4, 4), (0, 3)))
+
+# map = Map(5)
+# path = generate_random_path(5, 5, (4, 4), (0, 3))
+# cars = [(1, 1), (2, 2), (3, 3)]
+# display_map(map, path, cars)

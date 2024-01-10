@@ -1,19 +1,20 @@
 from model import *
 import math
+from map_2 import Intersection
 
 
 class CarController:
     def adjust_speed(
         car: Car,
         car_in_front: Car,
-        stop_position: Meters,
         max_speed: float,
         dt: Seconds,
     ):
+        # TODO: Now that i have the reference to the next intersection i can query it directly
         #  assuming always closed intersection for now
         if (
             too_fast(car, max_speed)
-            or too_close_to_intersection(car, stop_position)
+            or too_close_to_intersection(car, car.next_intersection)
             or too_close_to_car_in_front(car, car_in_front)
         ):
             slow_down_car(car, dt)
@@ -59,13 +60,23 @@ def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
     return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_MARGIN
 
 
-def too_close_to_intersection(car: Car, intersection_position: Meters) -> bool:
-    d = calculate_distance(car.position, intersection_position)
+def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
+    if intersection is None:
+        return False
+
+    can_go = intersection.can_go(car.direction)
+
+    # TODO: Make this work with turning and such
+    if can_go[0]:
+        return False
+
+    d = calculate_distance(car.position, (intersection.x, intersection.y))
     if d < CAR_MIN_DISTANCE:
         return True
 
     SAFETY_MARGIN = 2
     safe_distance = stopping_distance(car.speed, car.deceleration)
+    print(safe_distance, d - CAR_MIN_DISTANCE)
     return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_MARGIN
 
 

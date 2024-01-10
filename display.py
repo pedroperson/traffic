@@ -5,7 +5,7 @@ from model import *
 # Assuming 1d horizontal road for now
 def print_road(CARS, stop_position):
     # Length of each text character
-    DX = Meters(20)
+    DX = Meters(1)
     ROAD_WIDTH = ceil(stop_position[0] / DX)
 
     # Print the road in a line of text
