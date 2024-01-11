@@ -15,16 +15,18 @@ class State:
 
 
 def run_simulation():
-    time_steps = 3000  # Total number of time steps for the simulation
+    time_steps = 8000  # Total number of time steps for the simulation
     dt = 0.02  # Time step duration
-    street_length = Meters(100)  # From intersection to intersection
-    nodes_per_row = 3  # Number of intersections per row
+    street_length = Meters(300)  # From intersection to intersection
+    nodes_per_row = 8  # Number of intersections per row
 
     state = init_test_map(nodes_per_row, street_length)
 
+    map_width = street_length * (nodes_per_row - 1)
+
     for _ in range(time_steps):
         step(state, dt)
-        print_road(state.cars, (210, 0), state.lights)
+        print_road(state.cars, map_width, state.lights)
         state.current_time += dt
 
     print("Simulation complete.")
@@ -62,13 +64,12 @@ def init_test_map(nodes_per_row: int, edge_length: Meters) -> State:
     lights = []
 
     def new_traffic_light(x, y):
-        l = TrafficLight(x, y, cycle_period=20, proportionX=0.5)
+        l = TrafficLight(x, y, cycle_period=50, proportionX=0.5)
         lights.append(l)
         the_map.set_traffic_light(l)
 
-    new_traffic_light(0, 0)
-    new_traffic_light(100, 0)
-    new_traffic_light(200, 0)
+    for i in range(nodes_per_row - 1):
+        new_traffic_light((i + 1) * edge_length, 0)
 
     # Initialize and place the cars
     cars = []

@@ -5,10 +5,10 @@ import time
 
 
 # Assuming 1d horizontal road for now
-def print_road(CARS, stop_position, lights):
+def print_road(CARS, whole_length: Meters, lights):
     # Length of each text character
-    DX = Meters(2)
-    ROAD_WIDTH = ceil(stop_position[0] / DX)
+    DX = whole_length / 100
+    ROAD_WIDTH = ceil(whole_length / DX)
 
     # Print the road in a line of text
     for x in range(ROAD_WIDTH):
@@ -30,8 +30,6 @@ def print_road(CARS, stop_position, lights):
             print("O", end="") if intersection.green_for_X else print("X", end="")
         if car:
             print("@", end="")
-        elif stop_position[0] >= (x * DX) and stop_position[0] <= ((x + 1) * DX):
-            print("X", end="")
         else:
             print(".", end="")
     print("")

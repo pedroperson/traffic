@@ -32,30 +32,9 @@ class Intersection:
         if self.traffic_light is None:
             return (True, True)
 
-        # TODO: we can also simplify this to distance and speed so its easier to deal with
-
-        # Adapting to the old format for now, TODO: should stop doing this soon
-        def convert_to_old_format(dir):
-            c = self.incoming_car[dir]
-            if c is None:
-                return None
-
-            dx, dy = direction_map[dir]
-            return (
-                c.position[0],
-                c.position[1],
-                dx * c.speed,
-                dy * c.speed,
-            )
-
-        cars = {
-            Direction.N: convert_to_old_format(Direction.N),
-            Direction.E: convert_to_old_format(Direction.E),
-            Direction.S: convert_to_old_format(Direction.S),
-            Direction.W: convert_to_old_format(Direction.W),
-        }
-
-        return self.traffic_light.can_go(direction, cars)
+        incoming_car = self.incoming_car[opposite_direction[direction]]
+        # Ask the traffic light if a car could currently go in this direction
+        return self.traffic_light.can_go(direction, incoming_car)
 
 
 class Map:
@@ -253,9 +232,10 @@ def is_ahead(d, position, other_position):
 
 
 # Not sure this belongs here
-def car_passed_intersection(car):
+def car_passed_intersection(car: Car):
     if car.next_intersection is None:
         return False
+
     return is_ahead(
         car.direction, car.position, (car.next_intersection.x, car.next_intersection.y)
     )

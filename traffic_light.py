@@ -1,4 +1,5 @@
 from model import *
+from typing import Dict, Optional
 
 
 class GPS(Enum):
@@ -34,15 +35,38 @@ class TrafficLight:
         self.safety_time = safety_time
         self.last_crossed = [0, 0, 0, 0]
 
-    def display_light(self, cars, time_stamp):
-        LightController.update_state(self, time_stamp)
-        return (
-            self.can_go(Direction.N, cars),
-            self.can_go(Direction.E, cars),
-            self.can_go(Direction.S, cars),
-            self.can_go(Direction.W, cars),
-        )
+    def set_state(self, state: bool):
+        self.green_for_X = state
 
+    # Probably need a from and to direction
+    def can_go(self, direction: Direction, incoming_car: Car):
+        if direction == Direction.E or direction == Direction.W:
+            light_is_green = self.green_for_X
+        else:
+            light_is_green = not self.green_for_X
+
+        if not light_is_green:
+            return False, False
+
+        left_arrow = self.has_enough_time_to_cross(incoming_car)
+        # I think this return is confusing
+        return (light_is_green, left_arrow)
+
+    def has_enough_time_to_cross(self, incoming_car: Car):
+        if incoming_car is None:
+            return True
+
+        # Avoiding a divide by 0 error
+        if incoming_car.speed == 0:
+            return True
+
+        intersection = (self.positionX, self.positionY)
+        distance = calculate_distance(incoming_car.position, intersection)
+        time_to_cross = distance / incoming_car.speed
+
+        return time_to_cross > self.safety_time
+
+    # TODO: Need to update these!
     def just_crossed(self, car, direction: Direction):
         self.last_crossed[direction.value] = car
 
@@ -53,40 +77,6 @@ class TrafficLight:
         if car in self.last_crossed:
             self.last_crossed[self.last_crossed.index(car)] = 0
 
-    def can_go(self, direction: Direction, cars):
-        if direction == Direction.E or direction == Direction.W:
-            light_is_green = self.green_for_X
-        else:
-            light_is_green = not self.green_for_X
-
-        if not light_is_green:
-            return False, False
-
-        left_arrow = self.has_enough_time_to_cross(direction, cars)
-        # I think this return is confusion
-        return (light_is_green, left_arrow)
-
-    # NEEDSWORK: Make this work with dictionary of cars
-    def has_enough_time_to_cross(self, direction: Direction, cars):
-        opposite = opposite_direction[direction]
-        car = cars[opposite]
-
-        if car is None:
-            return True
-
-        if direction == Direction.E or direction == Direction.W:
-            dir = GPS.x.value
-            deltadir = GPS.dx.value
-        else:
-            dir = GPS.y.value
-            deltadir = GPS.dy.value
-
-        time_to_cross = (car[dir] - self.positionX) / car[deltadir]
-        return time_to_cross > self.safety_time
-
-    def set_state(self, state):
-        self.green_for_X = state
-
 
 class LightController:
     def update_state(light: TrafficLight, time_stamp):
@@ -95,3 +85,12 @@ class LightController:
             light.set_state(True)
         else:
             light.set_state(False)
+
+
+import math
+
+
+def calculate_distance(point1: Point, point2: Point) -> Meters:
+    x1, y1 = point1
+    x2, y2 = point2
+    return math.hypot(x2 - x1, y2 - y1)
