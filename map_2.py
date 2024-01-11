@@ -32,6 +32,7 @@ class Intersection:
         if self.traffic_light is None:
             return (True, True)
         # TODO: Need to get rid of this pasing in car stuff. The traffic light should remember this by itself
+        # TODO: we can also simplify this to distance and speed so its easier to deal with
         cars = {
             Direction.N: (4, 1.3, 0, 0.45),
             Direction.E: (3.7, 1, 0.30, 0),

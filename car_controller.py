@@ -6,16 +6,14 @@ from map_2 import Intersection
 class CarController:
     def adjust_speed(
         car: Car,
-        car_in_front: Car,
         max_speed: float,
         dt: Seconds,
     ):
-        # TODO: Now that i have the reference to the next intersection i can query it directly
         #  assuming always closed intersection for now
         if (
             too_fast(car, max_speed)
             or too_close_to_intersection(car, car.next_intersection)
-            or too_close_to_car_in_front(car, car_in_front)
+            or too_close_to_car_in_front(car, car.car_in_front)
         ):
             slow_down_car(car, dt)
         else:
@@ -33,6 +31,10 @@ class CarController:
             car.position[1] - delta_y * car.length,
         )
 
+    # Separating this step so we can perform the calculation before we update the speed and position for this step. Furthermore, we can perform this calculation only once and use its value as often as we need.
+    def cache_stopping_distance(car: Car):
+        car.stopping_distance = stopping_distance(car.speed, car.deceleration)
+
 
 def speed_up_car(car: Car, dt: Seconds):
     car.speed += car.acceleration * dt
@@ -44,6 +46,7 @@ def slow_down_car(car: Car, dt: Seconds):
         car.speed = 0
 
 
+# NEEDS WORK
 def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
     if ahead is None:
         return False
@@ -53,7 +56,7 @@ def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
         return True
 
     SAFETY_MARGIN = 2
-    # TODO: actually do math here
+    # TODO: actually do math here. now i have the stopping ditance precalculated so it should be easy
     # Super cop out here using a constant speed buffer
     # Actually this is really bad because we are not accounting for the fact that the car in front might be slowing down or how fast its going
     safe_distance = behind.speed * SPEED_BUFFER
@@ -64,6 +67,7 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     if intersection is None:
         return False
 
+    # IDK: Should this be the opposite direction?
     can_go = intersection.can_go(car.direction)
 
     # TODO: Make this work with turning and such
@@ -75,9 +79,8 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
         return True
 
     SAFETY_MARGIN = 2
-    safe_distance = stopping_distance(car.speed, car.deceleration)
 
-    return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_MARGIN
+    return d - CAR_MIN_DISTANCE <= car.stopping_distance * SAFETY_MARGIN
 
 
 def too_fast(car: Car, max_speed: Meters) -> bool:

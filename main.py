@@ -1,11 +1,17 @@
 from model import *
-from car_controller import CarController, car_passed_intersection
-from display import print_road
-from traffic_light import TrafficLight, LightController, opposite_direction
-import time
-from map import generate_random_path
-from map_2 import Map, Intersection
+from car_controller import CarController
+from traffic_light import TrafficLight, LightController
+from map_2 import Map
 from path import Path
+from display import print_road
+from typing import List
+
+
+class State:
+    the_map: Map
+    cars: List[Car]
+    lights: List[TrafficLight]
+    current_time: Seconds
 
 
 def run_simulation():
@@ -14,65 +20,58 @@ def run_simulation():
     street_length = Meters(100)  # From intersection to intersection
     nodes_per_row = 3  # Number of intersections per row
 
-    the_map, cars, lights = init_test_map(nodes_per_row, street_length)
+    state = init_test_map(nodes_per_row, street_length)
 
-    current_time = 0
     for _ in range(time_steps):
-        step(cars, lights, dt, current_time, the_map)
-        print_road(cars, (210, 0), lights)
-        current_time += dt
+        step(state, dt)
+        print_road(state.cars, (210, 0), state.lights)
+        state.current_time += dt
 
     print("Simulation complete.")
 
 
-def step(CARS: "list[Car]", lights, dt, current_time, the_map: Map):
-    for light in lights:
-        LightController.tick_light(light, current_time)
+def step(state: State, dt: Seconds):
+    for light in state.lights:
+        LightController.update_state(light, state.current_time)
 
-    for car in CARS:
+    # Calculate the stopping distance for each car before updating speed
+    for car in state.cars:
+        CarController.cache_stopping_distance(car)
+
+    # Adjust the speed before updating the position
+    for car in state.cars:
         CarController.adjust_speed(
             car,
-            car.car_in_front,
             MAX_SPEED,
             dt,
         )
 
-    for car in CARS:
+    # Finally adjust positions
+    for car in state.cars:
         CarController.update_position(car, dt)
 
-    the_map.deal_with_cars_past_intersection(CARS)
+    # Some cars will have moved past their intersections, so we tell the map to deal with them
+    state.the_map.deal_with_cars_past_intersection(state.cars)
 
 
-def init_test_map(nodes_per_row: int, edge_length: Meters):
+# Create a test map with 3 lights and a few cars going East
+def init_test_map(nodes_per_row: int, edge_length: Meters) -> State:
     the_map = Map(nodes_per_row, edge_length)
 
     # Initialize and place the traffic lights
     lights = []
+
+    def new_traffic_light(x, y):
+        l = TrafficLight(x, y, cycle_period=20, proportionX=0.5)
+        lights.append(l)
+        the_map.set_traffic_light(l)
+
     new_traffic_light(0, 0)
     new_traffic_light(100, 0)
     new_traffic_light(200, 0)
 
     # Initialize and place the cars
     cars = []
-    new_car(1, 0)
-    new_car(10, 20)
-    new_car(20, 20)
-    new_car(30, 20)
-    new_car(40, 20)
-    new_car(50, 20)
-    new_car(60, 20)
-    new_car(100, 20)
-    new_car(120, 16)
-    new_car(140, 10)
-    new_car(160, 6)
-    new_car(180, 0)
-
-    # TODO: connect cars that dont have a car ahead to the outgoing in their destination directions
-
-    def new_traffic_light(x, y):
-        l = TrafficLight(x, y, cycle_period=20, proportionX=0.5)
-        lights.append(l)
-        the_map.set_traffic_light(l)
 
     def new_car(x, speed):
         car = Car(x, 0, speed, Direction.E)
@@ -91,7 +90,28 @@ def init_test_map(nodes_per_row: int, edge_length: Meters):
         cars.append(car)
         the_map.insert_car(car)
 
-    return the_map, cars, lights
+    new_car(1, 0)
+    new_car(10, 20)
+    new_car(20, 20)
+    new_car(30, 20)
+    new_car(40, 20)
+    new_car(50, 20)
+    new_car(60, 20)
+    new_car(100, 20)
+    new_car(120, 16)
+    new_car(140, 10)
+    new_car(160, 6)
+    new_car(180, 0)
+
+    # TODO: connect cars that dont have a car ahead to the outgoing in their destination directions
+
+    # Return the initial state
+    state = State()
+    state.the_map = the_map
+    state.cars = cars
+    state.lights = lights
+    state.current_time = 0
+    return state
 
 
 # Note: To run the simulation, call run_stop_simulation()

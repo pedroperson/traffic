@@ -35,7 +35,7 @@ class TrafficLight:
         self.last_crossed = [0, 0, 0, 0]
 
     def display_light(self, cars, time_stamp):
-        LightController.tick_light(self, time_stamp)
+        LightController.update_state(self, time_stamp)
         return (
             self.can_go(Direction.N, cars),
             self.can_go(Direction.E, cars),
@@ -85,39 +85,9 @@ class TrafficLight:
 
 
 class LightController:
-    def tick_light(light: TrafficLight, time_stamp):
+    def update_state(light: TrafficLight, time_stamp):
         proptime = (int(time_stamp) % light.cycle_period) / light.cycle_period
         if proptime < light.proportionX:
             light.set_state(True)
         else:
             light.set_state(False)
-
-
-# PAGE 2
-
-import time
-
-
-def run_quick_test():
-    step_data = {
-        Direction.N: (4, 1.3, 0, 0.45),
-        Direction.E: (3.7, 1, 0.30, 0),
-        Direction.S: (4, 0.1, 0, -0.20),
-        Direction.W: (4.4, 1, -0.30, 0),
-    }
-
-    trafficlight1 = TrafficLight(4, 1, 0.3, 20)
-    print(trafficlight1.display_light(step_data, time.time()))
-    print(trafficlight1.can_go(Direction.N, step_data))
-
-    trafficlight1.just_crossed(123123, Direction.E)
-    print(trafficlight1.last_crossing(Direction.E))
-    trafficlight1.left_vicinity(89)
-    print(trafficlight1.last_crossing(Direction.E))
-    trafficlight1.left_vicinity(123123)
-    print(trafficlight1.last_crossing(Direction.E))
-
-    # PAGE 3
-    # trafficlight1.last_crossed.index(123123)
-    elem = 1
-    trafficlight1.last_crossed.index(elem) if elem in trafficlight1.last_crossed else -1

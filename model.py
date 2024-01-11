@@ -83,6 +83,8 @@ class Car:
         self.next_intersection = None
         # Not really optional, this should be created at init, but not here in this class. Car should not know about the map at all
         self.path: Path = None
+        # A cache for the stopping distance so we dont have to calculate it every time
+        self.stopping_distance: Meters = 0
 
     def __str__(self):
         return f"Car(pos={self.position}, speed={self.speed}, dir={self.direction})"
