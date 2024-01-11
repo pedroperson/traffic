@@ -36,4 +36,4 @@ def print_road(CARS, stop_position, lights):
             print(".", end="")
     print("")
     sys.stdout.write("\033[F")
-    time.sleep(0.01)
+    time.sleep(0.001)

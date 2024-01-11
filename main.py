@@ -4,113 +4,16 @@ from display import print_road
 from traffic_light import TrafficLight, LightController, opposite_direction
 import time
 from map import generate_random_path
-from map_2 import Map
+from map_2 import Map, Intersection
 
 
 def run_simulation():
-    LEN = Meters(100)
-    # Initialize the environment
-    the_map = Map(3, LEN)
-
-    lights = []
-
-    def new_traffic_light(x, y):
-        l = TrafficLight(x, y, cycle_period=20, proportionX=0.5)
-        lights.append(l)
-        the_map.set_traffic_light(int(x / LEN), int(y / LEN), l)
-
-    new_traffic_light(0, 0)
-    new_traffic_light(100, 0)
-    new_traffic_light(200, 0)
-
-    # We are simulating just a stright road to a eternally red light
-
-    cars = [
-        Car(1, 0, 0, Direction.E),
-        Car(10, 0, 20, Direction.E),
-        Car(20, 0, 20, Direction.E),
-        Car(30, 0, 20, Direction.E),
-        Car(40, 0, 20, Direction.E),
-        Car(50, 0, 20, Direction.E),
-        Car(60, 0, 20, Direction.E),
-        Car(100, 0, 20, Direction.E),
-        Car(120, 0, 16, Direction.E),
-        Car(140, 0, 10, Direction.E),
-        Car(160, 0, 6, Direction.E),
-        Car(180, 0, 0, Direction.E),
-    ]
-
-    # # Connect cars to themselves ->TODO: this is bad now, should do it through the intersaction
-    # for i in range(len(cars)):
-    #     if i > 0:
-    #         cars[i].car_behind = cars[i - 1]
-    #     if i < len(cars) - 1:
-    #         cars[i].car_in_front = cars[i + 1]
-
-    # Connect cars to their next intersection
-    for i, car in enumerate(cars):
-        next_intersection = the_map.closest_intersection(
-            car.position[0], car.position[1], car.direction
-        )
-        car.next_intersection = next_intersection
-
-        # I dont think this coninue is needed anymore
-        if car.next_intersection is None:
-            continue
-
-        opposite_dir = opposite_direction[car.direction]
-        last_car = next_intersection.incoming_car[opposite_dir]
-
-        if last_car is None:
-            next_intersection.incoming_car[opposite_dir] = car
-        else:
-            if is_ahead(car.direction, car.position, last_car.position):
-                next_intersection.incoming_car[opposite_dir] = car
-                # insert at front of the line
-                car.car_behind = last_car
-                last_car.car_in_front = car
-
-            elif last_car.car_behind is None:
-                # insert at end of the line
-                car.car_in_front = last_car
-                last_car.car_behind = car
-
-            else:
-                found = False
-                while last_car.car_behind is not None:
-                    last_car = last_car.car_behind
-                    if is_ahead(car.direction, car.position, last_car.position):
-                        found = True
-                        break
-
-                if not found:
-                    # insert at end of the line
-                    car.car_in_front = last_car
-                    last_car.car_behind = car
-                else:
-                    # insert at middle of the line
-                    car.car_behind = last_car
-                    car.car_in_front = last_car.car_in_front
-                    last_car.car_in_front = car
-
-        # Now hit it from the back so we can fill out the outgoing car lists
-        previous_intersection = the_map.closest_intersection(
-            car.position[0], car.position[1], opposite_dir
-        )
-
-        first_car = previous_intersection.outgoing_car[car.direction]
-        if first_car is None:
-            previous_intersection.outgoing_car[car.direction] = car
-        else:
-            if is_behind(car.direction, car.position, first_car.position):
-                previous_intersection.outgoing_car[car.direction] = car
-                first_car.car_behind = car
-                car.car_in_front = first_car
-
-        # TODO: connect intersection to car as well
-
     time_steps = 3000  # Total number of time steps for the simulation
     dt = 0.02  # Time step duration
+    street_length = Meters(100)  # From intersection to intersection
+
+    the_map, cars, lights = init_test_map(street_length)
+
     last_time = int(time.time())
     for i in range(time_steps):
         # dt = time.time() - last_time
@@ -119,6 +22,47 @@ def run_simulation():
         print_road(cars, (210, 0), lights)
 
     print("Simulation complete.")
+
+
+def init_test_map(edge_length: Meters):
+    the_map = Map(3, edge_length)
+
+    # Initialize and place the traffic lights
+    lights = []
+
+    def new_traffic_light(x, y):
+        l = TrafficLight(x, y, cycle_period=20, proportionX=0.5)
+        lights.append(l)
+        the_map.set_traffic_light(l)
+
+    new_traffic_light(0, 0)
+    new_traffic_light(100, 0)
+    new_traffic_light(200, 0)
+
+    # Initialize and place the cars
+    cars = []
+
+    def new_car(x, speed):
+        car = Car(x, 0, speed, Direction.E)
+        cars.append(car)
+        the_map.insert_car(car)
+
+    new_car(1, 0)
+    new_car(10, 20)
+    new_car(20, 20)
+    new_car(30, 20)
+    new_car(40, 20)
+    new_car(50, 20)
+    new_car(60, 20)
+    new_car(100, 20)
+    new_car(120, 16)
+    new_car(140, 10)
+    new_car(160, 6)
+    new_car(180, 0)
+
+    # TODO: connect cars that dont have a car ahead to the outgoing in their destination directions
+
+    return the_map, cars, lights
 
 
 def step(CARS, lights, dt, current_time, the_map: Map):
@@ -172,32 +116,6 @@ def step(CARS, lights, dt, current_time, the_map: Map):
             # car.next_intersection.car_passed(car)
 
         # Check if car has passed the intersection
-
-
-def is_ahead(d, position, other_position):
-    if d == Direction.N:
-        return position[1] > other_position[1]
-    elif d == Direction.S:
-        return position[1] < other_position[1]
-    elif d == Direction.E:
-        return position[0] > other_position[0]
-    elif d == Direction.W:
-        return position[0] < other_position[0]
-    else:
-        raise ValueError("Invalid direction")
-
-
-def is_behind(d, position, other_position):
-    if d == Direction.N:
-        return position[1] < other_position[1]
-    elif d == Direction.S:
-        return position[1] > other_position[1]
-    elif d == Direction.E:
-        return position[0] < other_position[0]
-    elif d == Direction.W:
-        return position[0] > other_position[0]
-    else:
-        raise ValueError("Invalid direction")
 
 
 # Note: To run the simulation, call run_stop_simulation()
