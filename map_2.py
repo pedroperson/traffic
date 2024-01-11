@@ -8,6 +8,20 @@ class Intersection:
         self.x = x
         self.y = y
         self.traffic_light = None
+        # Direction the car is coming from
+        self.incoming_car = {
+            Direction.N: None,
+            Direction.E: None,
+            Direction.S: None,
+            Direction.W: None,
+        }
+        # Direction the car left towards
+        self.outgoing_car = {
+            Direction.N: None,
+            Direction.E: None,
+            Direction.S: None,
+            Direction.W: None,
+        }
 
     def set_traffic_light(self, traffic_light: TrafficLight):
         self.traffic_light = traffic_light
@@ -53,13 +67,45 @@ class Map:
 
         # Round according to direction
         if direction == Direction.N:
+            # Handle case where we are exactly on an intersection. in that case we want to return the next intesection in that direction
+            if y % 1 == 0:
+                y += 1
+
             return self.intersections[math.floor(x)][math.ceil(y)]
         elif direction == Direction.S:
+            if y % 1 == 0:
+                y -= 1
             return self.intersections[math.ceil(x)][math.floor(y)]
         elif direction == Direction.E:
+            if x % 1 == 0:
+                x += 1
             return self.intersections[math.ceil(x)][math.ceil(y)]
         elif direction == Direction.W:
+            if x % 1 == 0:
+                x -= 1
             return self.intersections[math.floor(x)][math.floor(y)]
+        else:
+            raise ValueError("Invalid direction")
+
+    def next_intersection(self, intersection: Intersection, direction: Direction):
+        x = int(intersection.x / self.edge_length)
+        y = int(intersection.y / self.edge_length)
+        if direction == Direction.N:
+            if y + 1 >= self.nodes_per_row:
+                return None
+            return self.intersections[x][y + 1]
+        elif direction == Direction.S:
+            if y - 1 < 0:
+                return None
+            return self.intersections[x][y - 1]
+        elif direction == Direction.E:
+            if x + 1 >= self.nodes_per_row:
+                return None
+            return self.intersections[x + 1][y]
+        elif direction == Direction.W:
+            if x - 1 < 0:
+                return None
+            return self.intersections[x - 1][y]
         else:
             raise ValueError("Invalid direction")
 
