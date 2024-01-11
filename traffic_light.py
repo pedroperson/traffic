@@ -66,9 +66,13 @@ class TrafficLight:
         # I think this return is confusion
         return (light_is_green, left_arrow)
 
+    # NEEDSWORK: Make this work with dictionary of cars
     def has_enough_time_to_cross(self, direction: Direction, cars):
         opposite = opposite_direction[direction]
         car = cars[opposite]
+
+        if car is None:
+            return True
 
         if direction == Direction.E or direction == Direction.W:
             dir = GPS.x.value

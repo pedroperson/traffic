@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Tuple, Optional
+from typing import Tuple, Optional, Dict
 from path import Path
 
 # from map_2 import Intersection
@@ -36,7 +36,7 @@ class Direction(Enum):
 
 
 # A map to convert the direction to a tuple of (delta_x, delta_y)
-direction_map = {
+direction_map: Dict[Direction, Tuple[int, int]] = {
     Direction.N: (0, 1),
     Direction.E: (1, 0),
     Direction.S: (0, -1),

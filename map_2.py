@@ -31,14 +31,30 @@ class Intersection:
         # Everything is allowed fuck it go!
         if self.traffic_light is None:
             return (True, True)
-        # TODO: Need to get rid of this pasing in car stuff. The traffic light should remember this by itself
+
         # TODO: we can also simplify this to distance and speed so its easier to deal with
+
+        # Adapting to the old format for now, TODO: should stop doing this soon
+        def convert_to_old_format(dir):
+            c = self.incoming_car[dir]
+            if c is None:
+                return None
+
+            dx, dy = direction_map[dir]
+            return (
+                c.position[0],
+                c.position[1],
+                dx * c.speed,
+                dy * c.speed,
+            )
+
         cars = {
-            Direction.N: (4, 1.3, 0, 0.45),
-            Direction.E: (3.7, 1, 0.30, 0),
-            Direction.S: (4, 0.1, 0, -0.20),
-            Direction.W: (4.4, 1, -0.30, 0),
+            Direction.N: convert_to_old_format(Direction.N),
+            Direction.E: convert_to_old_format(Direction.E),
+            Direction.S: convert_to_old_format(Direction.S),
+            Direction.W: convert_to_old_format(Direction.W),
         }
+
         return self.traffic_light.can_go(direction, cars)
 
 
