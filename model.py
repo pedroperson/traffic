@@ -1,5 +1,8 @@
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, Optional
+from path import Path
+
+# from map_2 import Intersection
 
 # UNITS:
 # time: seconds (s)
@@ -71,11 +74,15 @@ class Car:
             self.position[1] - delta_y * self.length,
         )
 
+        # TODO: move this knowledge away from the car, it belongs in the controller or higher
         # The car behind me: keep this reference to tell the intersection to track that once I have passed
-        self.car_behind = None
+        self.car_behind: Optional[Car] = None
         # Car in front: keep reference so we can measure its speed and position and know whether we need to brake as to no crash against them.
-        self.car_in_front = None
+        self.car_in_front: Optional[Car] = None
+        # Another reason to keep this out model, : Optional[Intersection]  is the type hint here but we cant use it because of circular imports
         self.next_intersection = None
+        # Not really optional, this should be created at init, but not here in this class. Car should not know about the map at all
+        self.path: Path = None
 
     def __str__(self):
         return f"Car(pos={self.position}, speed={self.speed}, dir={self.direction})"
