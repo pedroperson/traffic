@@ -49,10 +49,9 @@ def step(state: State, dt: Seconds):
 
     # Finally adjust positions
     for car in state.cars:
-        CarController.update_position(car, dt)
+        car.move_forward(dt)
 
     # Some cars will have moved past their intersections, so we tell the map to deal with them
-
     MapController.deal_with_cars_past_intersection(state.the_map, state.cars)
 
 

@@ -13,15 +13,16 @@ class CarController:
     ):
         if (
             too_fast(car.speed, max_speed)
-            or too_close_to_intersection(car, car.next_intersection)
+            or too_close_to_intersection(car, car.target_intersection)
             or too_close_to_car_in_front(car, car.car_in_front)
         ):
             car.brake(dt)
         else:
             car.accelerate(dt)
 
-    def update_position(car: Car, dt: Seconds):
-        car.move_forward(dt)
+
+def too_fast(car_speed: float, max_speed: Meters) -> bool:
+    return car_speed >= max_speed
 
 
 # TODO: NEEDS WORK
@@ -41,6 +42,7 @@ def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
     return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_MARGIN
 
 
+# TODO: needs work
 def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     if intersection is None:
         return False
@@ -58,10 +60,6 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     SAFETY_MARGIN = 2
 
     return d - CAR_MIN_DISTANCE <= car.stopping_distance() * SAFETY_MARGIN
-
-
-def too_fast(car_speed: float, max_speed: Meters) -> bool:
-    return car_speed >= max_speed
 
 
 # HELPER MATH FUNCTIONS

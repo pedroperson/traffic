@@ -3,6 +3,7 @@ from typing import List
 from model import *
 from car import Car
 from map import Map
+from intersection import Intersection
 
 
 class MapController:
@@ -16,26 +17,35 @@ class MapController:
     # TODO: Needs to update the intersection
     # TODO: Needs to update cars ahead and behind
     # TODO: Needs to update the position and direction of current car
+    # THESE SHOULD PROBABLY NOT BE CARS, THEY SHOULD BE DRIVERS OR NOT VEHICLE BUT CARS
     def deal_with_cars_past_intersection(map: Map, CARS: List[Car]):
         for car in CARS:
-            intersection = car.next_intersection
-            if intersection is None:
+            if car.target_intersection is None:
                 continue
 
-            if not is_ahead(car.direction, car.position, intersection.position):
+            if not car_passed_intersection(car, car.target_intersection.position):
                 continue
 
-            # Get next car direction
             # Get intersection
+            origin = car.target_intersection
+            origin: Intersection = origin
+            direction = car.direction
+            # next_direction = car.next_direction()
+
+            # next_intersection = map.next_intersection(origin, next_direction)
+            # find last car in the new lane
             # Connect car to end of intersection line
-            # Connect car to intersection
-            # Connect old intersection to car
-            # Connect old intersection to car behind
             # OPTIONALLY: Connect intersectino to car if it is the first one
+            # Connect old intersection to car
+            # origin.
+
+            # Connect old intersection to car behind
             # OPTIONALLY: Set car position and direction to align with the new intersection
+            # Connect car to intersection
+            # car.target_intersection = next_intersection
 
             # TODO: This should be the destination of the car, not the current direction
-            from_intersection = car.next_intersection
+            from_intersection = car.target_intersection
             from_direction = car.direction
             # set up the next car here from the incoming and outgoing shit
             path = car.path
@@ -60,10 +70,14 @@ class MapController:
 
             # Get and attach next target intersection
             next_intersection = map.next_intersection(from_intersection, destination)
-            car.next_intersection = next_intersection
+            car.target_intersection = next_intersection
             # TODO: Update car ahead and behind relations
             # TODO: Update the outgoing and incoming arrays in both interections
             # car.next_intersection.car_passed(car)
+
+
+def car_passed_intersection(car: Car, intersection_position: Point):
+    return is_ahead(car.direction, car.position, intersection_position)
 
 
 # This belongs with the function above, the map doesn't need to know about this necessarily
@@ -72,11 +86,12 @@ def insert_car_in_lane(car: Car, the_map: Map):
     intersection = the_map.closest_intersection(
         car.position[0], car.position[1], car.direction
     )
-    car.next_intersection = intersection
+    car.target_intersection = intersection
 
     if intersection is None:
         return
 
+    # TODO: Break this out into another function
     # In the point of view of the intersection, the car is incoming from the opposite direction
     opposite_dir = opposite_direction[car.direction]
     # Get the car closest to the intersection so that we can find out how to insert this car in the lane
@@ -131,7 +146,7 @@ def insert_as_outgoing(car: Car, the_map: Map):
     car.car_in_front = last_car
 
 
-def is_ahead(d, position, other_position):
+def is_ahead(d: Direction, position: Point, other_position: Point):
     if d == Direction.N:
         return position[1] > other_position[1]
     elif d == Direction.S:
@@ -142,11 +157,3 @@ def is_ahead(d, position, other_position):
         return position[0] < other_position[0]
     else:
         raise ValueError("Invalid direction")
-
-
-# Not sure this belongs here
-def car_passed_intersection(car: Car):
-    if car.next_intersection is None:
-        return False
-
-    return is_ahead(car.direction, car.position, car.next_intersection.position)

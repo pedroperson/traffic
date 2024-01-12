@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 
 from model import Meters, Direction, direction_map, CAR_LENGTH, CAR_WIDTH
 
@@ -34,7 +34,7 @@ class Car:
         # Car in front: keep reference so we can measure its speed and position and know whether we need to brake as to no crash against them.
         self.car_in_front: Optional[Car] = None
         # Another reason to keep this out model, : Optional[Intersection]  is the type hint here but we cant use it because of circular imports
-        self.next_intersection = None
+        self.target_intersection: Any = None
         # Not really optional, this should be created at init, but not here in this class. Car should not know about the map at all
         self.path = None
 
