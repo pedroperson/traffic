@@ -1,7 +1,8 @@
 from model import *
 from car_controller import CarController
-from traffic_light import TrafficLight, LightController
-from map_2 import Map
+from light import Light
+
+from map import Map
 from path import Path
 from display import print_road
 from typing import List
@@ -10,7 +11,7 @@ from typing import List
 class State:
     the_map: Map
     cars: List[Car]
-    lights: List[TrafficLight]
+    lights: List[Light]
     current_time: Seconds
 
 
@@ -26,7 +27,7 @@ def run_simulation():
 
     for _ in range(time_steps):
         step(state, dt)
-        print_road(state.cars, map_width, state.lights)
+        print_road(state.cars, map_width, state.lights, state.the_map)
         state.current_time += dt
 
     print("Simulation complete.")
@@ -34,7 +35,7 @@ def run_simulation():
 
 def step(state: State, dt: Seconds):
     for light in state.lights:
-        LightController.update_state(light, state.current_time)
+        light.update_state(state.current_time)
 
     # Calculate the stopping distance for each car before updating speed
     for car in state.cars:
@@ -64,12 +65,12 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
     lights = []
 
     def new_traffic_light(x, y):
-        l = TrafficLight(x, y, cycle_period=50, proportionX=0.5)
+        l = Light(cycle_period=30, proportion_x=0.5)
         lights.append(l)
-        the_map.set_traffic_light(l)
+        the_map.set_traffic_light(l, x, y)
 
     for i in range(nodes_per_row - 1):
-        new_traffic_light((i + 1) * road_length, 0)
+        new_traffic_light((i + 1), 0)
 
     # Initialize and place the cars
     cars = []

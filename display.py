@@ -2,10 +2,11 @@ from math import ceil
 from model import *
 import sys
 import time
+from map import Map
 
 
 # Assuming 1d horizontal road for now
-def print_road(CARS, whole_length: Meters, lights):
+def print_road(CARS, whole_length: Meters, lights, map: Map):
     # Length of each text character
     DX = whole_length / 120
     ROAD_WIDTH = ceil(whole_length / DX)
@@ -21,13 +22,23 @@ def print_road(CARS, whole_length: Meters, lights):
                 break
 
         intersection = None
-        for l in lights:
-            if l.positionX >= x * DX and l.positionX < (x + 1) * DX:
-                intersection = l
+        for row in map.intersections:
+            for i in row:
+                if i.position[0] >= x * DX and i.position[0] < (x + 1) * DX:
+                    intersection = i
+                    break
+            if intersection:
                 break
 
         if intersection:
-            print("O", end="") if intersection.green_for_X else print("X", end="")
+            char = (
+                " "
+                if intersection.light is None
+                else "O"
+                if intersection.light.is_on
+                else "X"
+            )
+            print(char, end="")
         if car:
             print("@", end="")
         else:

@@ -37,3 +37,7 @@ git push origin main
 ## Formating
 
 I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets use the default settings for now.
+
+## TODOs
+
+- move the piece and relationships management to another file away from map_2, map should just answer helper functions about itself

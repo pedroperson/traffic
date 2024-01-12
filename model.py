@@ -2,8 +2,6 @@ from enum import Enum
 from typing import Tuple, Optional, Dict
 from path import Path
 
-# from map_2 import Intersection
-
 # UNITS:
 # time: seconds (s)
 Seconds = float
@@ -41,6 +39,21 @@ direction_map: Dict[Direction, Tuple[int, int]] = {
     Direction.E: (1, 0),
     Direction.S: (0, -1),
     Direction.W: (-1, 0),
+}
+
+opposite_direction = {
+    Direction.N: Direction.S,
+    Direction.S: Direction.N,
+    Direction.E: Direction.W,
+    Direction.W: Direction.E,
+}
+
+# Direction where if heading in the key direction, a left turn would put me in the value direction
+direction_to_the_left = {
+    Direction.N: Direction.W,
+    Direction.S: Direction.E,
+    Direction.E: Direction.N,
+    Direction.W: Direction.S,
 }
 
 

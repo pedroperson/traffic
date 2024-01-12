@@ -1,6 +1,6 @@
 from model import *
 import math
-from map_2 import Intersection
+from map import Intersection
 
 
 class CarController:
@@ -68,14 +68,13 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     if intersection is None:
         return False
 
-    # IDK: Should this be the opposite direction?
-    can_go = intersection.can_go(car.direction)
+    # TODO: Now we need to consider the path we are going, if we are going to turn left right or go straight
 
-    # TODO: Make this work with turning and such
-    if can_go[0]:
+    # Assuming we are going straight for now
+    if intersection.is_green(car.direction):
         return False
 
-    d = calculate_distance(car.position, (intersection.x, intersection.y))
+    d = calculate_distance(car.position, intersection.position)
     if d < CAR_MIN_DISTANCE:
         return True
 
