@@ -16,8 +16,8 @@ class State:
 
 def run_simulation():
     time_steps = 8000  # Total number of time steps for the simulation
-    dt = 0.02  # Time step duration
-    street_length = Meters(300)  # From intersection to intersection
+    dt: Seconds = 0.02  # Time step duration
+    street_length: Meters = 300  # From intersection to intersection
     nodes_per_row = 8  # Number of intersections per row
 
     state = init_test_map(nodes_per_row, street_length)

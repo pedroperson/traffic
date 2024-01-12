@@ -2,12 +2,12 @@ from random import choice, sample
 
 
 class Path:
-    def __init__(self, map_x, map_y, start=(0, 0), end=(1, 1)):
+    def __init__(self, node_count_x: int, node_count_y: int, start=(0, 0), end=(1, 1)):
         self.s = start
         self.e = end
         self.index = 0
         self.path: list[tuple[int, int]] = generate_random_path(
-            map_x, map_y, start, end
+            node_count_x, node_count_y, start, end
         )
 
     # Call this to move to the next target
@@ -29,10 +29,11 @@ class Path:
         return self.e
 
 
-def generate_random_path(map_x, map_y, start=(0, 0), end=(1, 1)):
+# TODO: WE should do this with directions instea of x and y
+def generate_random_path(nodes_x: int, nodes_y: int, start=(0, 0), end=(1, 1)):
     def dfs(pos, path):
         x, y = pos
-        if not (0 <= x < map_x and 0 <= y < map_y) or pos in path:
+        if not (0 <= x < nodes_x and 0 <= y < nodes_y) or pos in path:
             return
         path.append(pos)
         if pos == end:

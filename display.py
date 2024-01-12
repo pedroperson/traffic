@@ -7,7 +7,7 @@ import time
 # Assuming 1d horizontal road for now
 def print_road(CARS, whole_length: Meters, lights):
     # Length of each text character
-    DX = whole_length / 100
+    DX = whole_length / 30
     ROAD_WIDTH = ceil(whole_length / DX)
 
     # Print the road in a line of text
