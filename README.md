@@ -40,9 +40,11 @@ I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets
 
 ## TODOs
 
+- write display logic
 - write better versions of the functions at the bottom of map.py
 - write the map controller
+- remove the map knowdge for the car class -> I tried to do this but it requires a higher level of abstraction we dont have yet
+  PEDRO:
 - stop using the path class, its just more complexity for little gain
   - make other solution easy to tell which is the next direction
-- make path return a list of directions
-- remove the map knowdge for the car class -> maybe the way to do this is to create a vehicle class that just does vehicle stuff
+  - make path return a list of directions

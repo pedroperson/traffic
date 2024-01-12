@@ -1,6 +1,6 @@
 from typing import Optional, Any
 
-from model import Meters, Direction, direction_map, CAR_LENGTH, CAR_WIDTH
+from model import Meters, Direction, direction_map, CAR_LENGTH, CAR_WIDTH, Point
 
 
 # Car should keep the global positioning, vehicle should keep the speed and acceleration stuff
@@ -15,7 +15,7 @@ class Car:
         acceleration=5,
         deceleration=5,
     ):
-        self.position = (x, y)
+        self.position: Point = (x, y)
         self.speed = speed
         self.direction = direction
         # length of the car in the direction of travel
@@ -53,7 +53,11 @@ class Car:
             self.position[1] + delta_y * self.speed * dt,
         )
 
-    def back_position(self):
+    def reposition(self, position: Point, direction: Direction):
+        self.position = position
+        self.direction = direction
+
+    def back_position(self) -> Point:
         delta_x, delta_y = direction_map[self.direction]
         return (
             self.position[0] - delta_x * self.length,
