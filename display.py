@@ -1,12 +1,15 @@
 from math import ceil
-from model import *
 import sys
 import time
+from typing import List
+
+from model import *
 from map import Map
+from car import Car
 
 
 # Assuming 1d horizontal road for now
-def print_road(CARS, whole_length: Meters, lights, map: Map):
+def print_road(cars: List[Car], whole_length: Meters, map: Map):
     # Length of each text character
     DX = whole_length / 120
     ROAD_WIDTH = ceil(whole_length / DX)
@@ -15,7 +18,7 @@ def print_road(CARS, whole_length: Meters, lights, map: Map):
     for x in range(ROAD_WIDTH):
         # Check if there is a car at this position
         car = None
-        for c in CARS:
+        for c in cars:
             # idk why this actually works
             if c.position >= (x * DX, 0) and c.position < ((x + 1) * DX, 0):
                 car = c

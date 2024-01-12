@@ -1,7 +1,9 @@
-from model import *
-from light import Light
 from typing import Dict, Optional
 from math import hypot
+
+from model import *
+from light import Light
+from car import Car
 
 TURN_TIME = Seconds(6)
 

@@ -41,3 +41,4 @@ I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets
 ## TODOs
 
 - move the piece and relationships management to another file away from map_2, map should just answer helper functions about itself
+- remove the map knowdge for the car class

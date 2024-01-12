@@ -1,11 +1,12 @@
+from typing import List
+
 from model import *
 from car_controller import CarController
 from light import Light
-
+from car import Car
 from map import Map
 from path import Path
 from display import print_road
-from typing import List
 
 
 class State:
@@ -27,7 +28,7 @@ def run_simulation():
 
     for _ in range(time_steps):
         step(state, dt)
-        print_road(state.cars, map_width, state.lights, state.the_map)
+        print_road(state.cars, map_width, state.the_map)
         state.current_time += dt
 
     print("Simulation complete.")

@@ -1,6 +1,8 @@
-from model import *
 import math
-from map import Intersection
+
+from model import *
+from car import Car
+from intersection import Intersection
 
 
 class CarController:

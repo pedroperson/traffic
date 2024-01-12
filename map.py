@@ -1,8 +1,10 @@
-from model import *
 import math
-from typing import Dict, Optional, List
+from typing import List
+
+from model import *
 from intersection import Intersection
 from light import Light
+from car import Car
 
 
 class Map:
