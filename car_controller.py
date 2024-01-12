@@ -31,6 +31,7 @@ class CarController:
             car.position[1] - delta_y * car.length,
         )
 
+    # Fuck was this a mistake?
     # Separating this step so we can perform the calculation before we update the speed and position for this step. Furthermore, we can perform this calculation only once and use its value as often as we need.
     def cache_stopping_distance(car: Car):
         car.stopping_distance = stopping_distance(car.speed, car.deceleration)

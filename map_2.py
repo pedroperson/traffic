@@ -8,7 +8,7 @@ class Intersection:
     def __init__(self, x: Meters, y: Meters):
         self.x = x
         self.y = y
-        self.traffic_light = None
+        self.traffic_light: Optional[TrafficLight] = None
         # Direction the car is coming from
         self.incoming_car: Dict[Direction, Optional[Car]] = {
             Direction.N: None,
@@ -16,6 +16,7 @@ class Intersection:
             Direction.S: None,
             Direction.W: None,
         }
+
         # Direction the car left towards
         self.outgoing_car: Dict[Direction, Optional[Car]] = {
             Direction.N: None,
@@ -38,35 +39,38 @@ class Intersection:
 
 
 class Map:
-    def __init__(self, nodes_per_row: int, edge_length: Meters):
+    def __init__(self, nodes_per_row: int, road_length: Meters):
         self.intersections: list[list[Intersection]] = [
             [
-                Intersection(i * edge_length, j * edge_length)
+                Intersection(i * road_length, j * road_length)
                 for j in range(nodes_per_row)
             ]
             for i in range(nodes_per_row)
         ]
         self.nodes_per_row = nodes_per_row
-        self.edge_length = edge_length
+        self.road_length = road_length
 
     def set_traffic_light(self, traffic_light: TrafficLight):
-        x = int(traffic_light.positionX / self.edge_length)
-        y = int(traffic_light.positionY / self.edge_length)
+        x = int(traffic_light.positionX / self.road_length)
+        y = int(traffic_light.positionY / self.road_length)
         self.intersections[x][y].set_traffic_light(traffic_light)
 
     def insert_car(self, car: Car):
         insert_car_in_lane(car, self)
         insert_as_outgoing(car, self)
 
+    # TODO: could probably make this simpler and shorter
     # We will use closest_intersection to attach cars to their next intersection
     def closest_intersection(
         self, position_x: Meters, position_y: Meters, direction: Direction
     ) -> Intersection:
         # Scale dimensions from meters to nodes
-        x = position_x / self.edge_length
-        y = position_y / self.edge_length
+        x = position_x / self.road_length
+        y = position_y / self.road_length
 
         # TODO: I think the case when x or y is exatly an integer is not handled correctly, or at least not usefully for us, but maybe it wont matter
+
+        # TODO: Use direction_map from model.py
 
         # Round according to direction
         if direction == Direction.N:
@@ -90,9 +94,12 @@ class Map:
         else:
             raise ValueError("Invalid direction")
 
+    # TODO: Could be shortened!
     def next_intersection(self, intersection: Intersection, direction: Direction):
-        x = int(intersection.x / self.edge_length)
-        y = int(intersection.y / self.edge_length)
+        x = int(intersection.x / self.road_length)
+        y = int(intersection.y / self.road_length)
+        # TODO: Use direction_map from model.py
+
         if direction == Direction.N:
             if y + 1 >= self.nodes_per_row:
                 return None

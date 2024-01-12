@@ -1,6 +1,7 @@
 from random import choice, sample
 
 
+# TODO: This is just a glorified list, we dont need this
 class Path:
     def __init__(self, node_count_x: int, node_count_y: int, start=(0, 0), end=(1, 1)):
         self.s = start
@@ -13,6 +14,11 @@ class Path:
     # Call this to move to the next target
     def step(self):
         self.index += 1
+
+    def previous_target(self):
+        if self.index - 1 < 0:
+            return None
+        return self.path[self.index - 1]
 
     def target(self):
         return self.path[self.index]

@@ -18,7 +18,7 @@ def run_simulation():
     time_steps = 8000  # Total number of time steps for the simulation
     dt: Seconds = 0.02  # Time step duration
     street_length: Meters = 300  # From intersection to intersection
-    nodes_per_row = 8  # Number of intersections per row
+    nodes_per_row = 3  # Number of intersections per row
 
     state = init_test_map(nodes_per_row, street_length)
 
@@ -57,8 +57,8 @@ def step(state: State, dt: Seconds):
 
 
 # Create a test map with 3 lights and a few cars going East
-def init_test_map(nodes_per_row: int, edge_length: Meters) -> State:
-    the_map = Map(nodes_per_row, edge_length)
+def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
+    the_map = Map(nodes_per_row, road_length)
 
     # Initialize and place the traffic lights
     lights = []
@@ -69,7 +69,7 @@ def init_test_map(nodes_per_row: int, edge_length: Meters) -> State:
         the_map.set_traffic_light(l)
 
     for i in range(nodes_per_row - 1):
-        new_traffic_light((i + 1) * edge_length, 0)
+        new_traffic_light((i + 1) * road_length, 0)
 
     # Initialize and place the cars
     cars = []
@@ -77,8 +77,8 @@ def init_test_map(nodes_per_row: int, edge_length: Meters) -> State:
     def new_car(x, speed):
         car = Car(x, 0, speed, Direction.E)
         # Since the direction is East
-        start_x = int(car.position[0] / the_map.edge_length)
-        start_y = int(car.position[1] / the_map.edge_length)
+        start_x = int(car.position[0] / the_map.road_length)
+        start_y = int(car.position[1] / the_map.road_length)
 
         # Generate a path till the end of the map
         car.path = Path(
