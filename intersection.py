@@ -10,9 +10,6 @@ TURN_TIME = Seconds(6)
 
 class Intersection:
     def __init__(self, x: Meters, y: Meters):
-        self.x = x
-        self.y = y
-        # I think id rather use the position as a tuple than as two variable
         self.position: Point = (x, y)
         self.light: Optional[Light] = None
         # Direction the car is coming from

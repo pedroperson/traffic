@@ -11,7 +11,6 @@ class CarController:
         max_speed: float,
         dt: Seconds,
     ):
-        #  assuming always closed intersection for now
         if (
             too_fast(car, max_speed)
             or too_close_to_intersection(car, car.next_intersection)
@@ -33,7 +32,7 @@ class CarController:
             car.position[1] - delta_y * car.length,
         )
 
-    # Fuck was this a mistake?
+    # Fuck was this a mistake? seems unecessary
     # Separating this step so we can perform the calculation before we update the speed and position for this step. Furthermore, we can perform this calculation only once and use its value as often as we need.
     def cache_stopping_distance(car: Car):
         car.stopping_distance = stopping_distance(car.speed, car.deceleration)
@@ -49,7 +48,7 @@ def slow_down_car(car: Car, dt: Seconds):
         car.speed = 0
 
 
-# NEEDS WORK
+# TODO: NEEDS WORK
 def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
     if ahead is None:
         return False

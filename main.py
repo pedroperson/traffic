@@ -2,6 +2,7 @@ from typing import List
 
 from model import *
 from car_controller import CarController
+from map_controller import MapController
 from light import Light
 from car import Car
 from map import Map
@@ -55,7 +56,8 @@ def step(state: State, dt: Seconds):
         CarController.update_position(car, dt)
 
     # Some cars will have moved past their intersections, so we tell the map to deal with them
-    state.the_map.deal_with_cars_past_intersection(state.cars)
+
+    MapController.deal_with_cars_past_intersection(state.the_map, state.cars)
 
 
 # Create a test map with 3 lights and a few cars going East
@@ -68,10 +70,11 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
     def new_traffic_light(x, y):
         l = Light(cycle_period=30, proportion_x=0.5)
         lights.append(l)
-        the_map.set_traffic_light(l, x, y)
+        intersection = the_map.intersection((x, y))
+        intersection.set_light(l)
 
     for i in range(nodes_per_row - 1):
-        new_traffic_light((i + 1), 0)
+        new_traffic_light((i + 1) * road_length, 0)
 
     # Initialize and place the cars
     cars = []
@@ -91,7 +94,7 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
         )
 
         cars.append(car)
-        the_map.insert_car(car)
+        MapController.insert_car(the_map, car)
 
     new_car(1, 0)
     new_car(10, 20)

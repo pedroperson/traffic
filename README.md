@@ -40,5 +40,6 @@ I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets
 
 ## TODOs
 
-- move the piece and relationships management to another file away from map_2, map should just answer helper functions about itself
+- write better versions of the functions at the bottom of map.py
 - remove the map knowdge for the car class
+- stop using the path class, its just more complexity for little gain
