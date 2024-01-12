@@ -12,40 +12,16 @@ class CarController:
         dt: Seconds,
     ):
         if (
-            too_fast(car, max_speed)
+            too_fast(car.speed, max_speed)
             or too_close_to_intersection(car, car.next_intersection)
             or too_close_to_car_in_front(car, car.car_in_front)
         ):
-            slow_down_car(car, dt)
+            car.brake(dt)
         else:
-            speed_up_car(car, dt)
+            car.accelerate(dt)
 
     def update_position(car: Car, dt: Seconds):
-        delta_x, delta_y = direction_map[car.direction]
-        car.position = (
-            car.position[0] + delta_x * car.speed * dt,
-            car.position[1] + delta_y * car.speed * dt,
-        )
-
-        car.back_position = (
-            car.position[0] - delta_x * car.length,
-            car.position[1] - delta_y * car.length,
-        )
-
-    # Fuck was this a mistake? seems unecessary
-    # Separating this step so we can perform the calculation before we update the speed and position for this step. Furthermore, we can perform this calculation only once and use its value as often as we need.
-    def cache_stopping_distance(car: Car):
-        car.stopping_distance = stopping_distance(car.speed, car.deceleration)
-
-
-def speed_up_car(car: Car, dt: Seconds):
-    car.speed += car.acceleration * dt
-
-
-def slow_down_car(car: Car, dt: Seconds):
-    car.speed -= car.deceleration * dt
-    if car.speed < 0:
-        car.speed = 0
+        car.move_forward(dt)
 
 
 # TODO: NEEDS WORK
@@ -53,7 +29,7 @@ def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
     if ahead is None:
         return False
 
-    d = calculate_distance(behind.position, ahead.back_position)
+    d = calculate_distance(behind.position, ahead.back_position())
     if d < CAR_MIN_DISTANCE:
         return True
 
@@ -81,16 +57,14 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
 
     SAFETY_MARGIN = 2
 
-    return d - CAR_MIN_DISTANCE <= car.stopping_distance * SAFETY_MARGIN
+    return d - CAR_MIN_DISTANCE <= car.stopping_distance() * SAFETY_MARGIN
 
 
-def too_fast(car: Car, max_speed: Meters) -> bool:
-    return car.speed >= max_speed
+def too_fast(car_speed: float, max_speed: Meters) -> bool:
+    return car_speed >= max_speed
 
 
 # HELPER MATH FUNCTIONS
-def stopping_distance(speed: float, deceleration: float):
-    return (speed**2) / (2 * deceleration)
 
 
 def calculate_distance(point1: Point, point2: Point) -> Meters:

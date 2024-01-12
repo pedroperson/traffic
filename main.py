@@ -39,10 +39,6 @@ def step(state: State, dt: Seconds):
     for light in state.lights:
         light.update_state(state.current_time)
 
-    # Calculate the stopping distance for each car before updating speed
-    for car in state.cars:
-        CarController.cache_stopping_distance(car)
-
     # Adjust the speed before updating the position
     for car in state.cars:
         CarController.adjust_speed(

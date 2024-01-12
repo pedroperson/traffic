@@ -41,5 +41,8 @@ I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets
 ## TODOs
 
 - write better versions of the functions at the bottom of map.py
-- remove the map knowdge for the car class
+- write the map controller
 - stop using the path class, its just more complexity for little gain
+  - make other solution easy to tell which is the next direction
+- make path return a list of directions
+- remove the map knowdge for the car class -> maybe the way to do this is to create a vehicle class that just does vehicle stuff
