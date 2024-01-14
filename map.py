@@ -22,7 +22,7 @@ class Map:
         y_index = int(position[1] / self.road_length)
         return self.intersections[x_index][y_index]
 
-    def intersection_at_index(self, node_x, node_y) -> Intersection:
+    def intersection_at_index(self, node_x: int, node_y: int) -> Intersection:
         return self.intersections[node_x][node_y]
 
     # TODO: could probably make this simpler and shorter
