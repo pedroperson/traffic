@@ -18,7 +18,8 @@ class Path:
 
     # Call this to move to the next target
     def step(self):
-        self.index += 1
+        if not self.reached_end():
+            self.index += 1
 
     def start(self):
         return self.s

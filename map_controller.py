@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from model import *
 from car import Car
@@ -24,52 +24,94 @@ class MapController:
             if car.target_intersection is None:
                 continue
 
-            if not car_passed_intersection(car, car.target_intersection.position):
-                continue
-
-            # Test if this is the last intersection
             if car.path.next_target() == None:
                 # TODO: Remove car from map
                 continue
 
-            # Get intersection
-            origin = car.target_intersection
-            origin: Intersection = origin
-            direction = car.direction
-            # next_direction = car.next_direction()
+            if not car_passed_intersection(car, car.target_intersection.position):
+                continue
 
-            # next_intersection = map.next_intersection(origin, next_direction)
-            # find last car in the new lane
-            # Connect car to end of intersection line
-            # OPTIONALLY: Connect intersectino to car if it is the first one
-            # Connect old intersection to car
-            # origin.
-
-            # Connect old intersection to car behind
-            # OPTIONALLY: Set car position and direction to align with the new intersection
-            # Connect car to intersection
-            # car.target_intersection = next_intersection
-
-            # TODO: This should be the destination of the car, not the current direction
-            from_intersection = car.target_intersection
+            from_intersection: Intersection = car.target_intersection
             from_direction = car.direction
-            # set up the next car here from the incoming and outgoing shit
+            car_behind = car.car_behind
+
             path: Path = car.path
             next_direction = path.next_direction()
             next_point = path.next_target()
-            # Get and attach next target intersection
-            next_intersection = map.intersection_at_index(next_point[0], next_point[1])
-            car.target_intersection = next_intersection
-
             path.step()
 
-            # TODO: Update car ahead and behind relations
-            # TODO: Update the outgoing and incoming arrays in both interections
-            # car.next_intersection.car_passed(car)
+            # Find the intersection the car will head to next
+            if next_point is not None:
+                next_intersection = map.intersection_at_index(
+                    next_point[0], next_point[1]
+                )
+                # Reposition car to the next intersection
+                car.target_intersection = next_intersection
+                car.reposition(from_intersection.position, next_direction)
+
+                # Insert the car in the next lane
+                last_car_in_lane = last_car(next_direction, next_intersection)
+                if last_car_in_lane == None:
+                    # Set car as first and only in line
+                    next_intersection.incoming_car[
+                        opposite_direction[next_direction]
+                    ] = car
+
+                    # Try connecting to the next lane over instead
+                    car.car_in_front = last_car_in_next_lane(car.path, map)
+                else:
+                    # Connect car to end of intersection line
+                    last_car_in_lane.car_behind = car
+                    car.car_in_front = last_car_in_lane
+            else:
+                car.target_intersection = None
+
+            # Set the car behind as the first in line for the original intersection
+            from_intersection.incoming_car[
+                opposite_direction[from_direction]
+            ] = car_behind
+
+            # Save our car as the outgoing for the original intersection
+            from_intersection.outgoing_car[next_direction] = car
+
+            # Connect the car that was behind us to a potential car in the next lane
+            car_behind.car_in_front = last_car_in_next_lane(car.path, map)
+
+
+def next_intersection(map: Map, next_point, direction: Direction):
+    if next_point is None:
+        return None
+    return map.intersection_at_index(next_point[0], next_point[1])
+
+
+def last_car_in_next_lane(path: Path, map: Map):
+    direction = path.next_direction()
+    intersection = intersection(map, path.next_target(), direction)
+    if intersection is None:
+        return None
+
+    return last_car(direction, intersection)
 
 
 def car_passed_intersection(car: Car, intersection_position: Point):
     return is_ahead(car.direction, car.position, intersection_position)
+
+
+def last_car(heading: Direction, intersection: Intersection) -> Optional[Car]:
+    car_in_front = intersection.incoming_car[opposite_direction[heading]]
+    if car_in_front == None:
+        return None
+
+    # Find the last car in line
+    while car_in_front.car_behind != None:
+        print(
+            " car_in_front.car_behind",
+            car_in_front.car_behind,
+            car_in_front.car_behind.position,
+        )
+        car_in_front = car_in_front.car_behind
+
+    return car_in_front
 
 
 # This belongs with the function above, the map doesn't need to know about this necessarily
@@ -124,18 +166,14 @@ def insert_as_outgoing(car: Car, the_map: Map):
     )
     if intersection is None:
         return
-
-    last_car = intersection.outgoing_car[car.direction]
-    if last_car is None:
-        intersection.outgoing_car[car.direction] = car
-        return
-
-    if is_ahead(car.direction, car.position, last_car.position):
-        return
-
+    # Set car as last outgoing
     intersection.outgoing_car[car.direction] = car
-    last_car.car_behind = car
-    car.car_in_front = last_car
+
+    # Connect the car to the car furthest back in the lane, setting it as the last
+    last = last_car(car.direction, intersection)
+    if last is not None:
+        last.car_behind = car
+        car.car_in_front = last
 
 
 def is_ahead(d: Direction, position: Point, other_position: Point):
