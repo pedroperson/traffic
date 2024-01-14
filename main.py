@@ -20,7 +20,7 @@ class State:
 def run_simulation():
     time_steps = 8000  # Total number of time steps for the simulation
     dt: Seconds = 0.02  # Time step duration
-    street_length: Meters = 300  # From intersection to intersection
+    street_length: Meters = 100  # From intersection to intersection
     nodes_per_row = 3  # Number of intersections per row
 
     state = init_test_map(nodes_per_row, street_length)
@@ -79,14 +79,9 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
         # Since the direction is East
         start_x = int(car.position[0] / the_map.road_length)
         start_y = int(car.position[1] / the_map.road_length)
-
+        end = (2, 0)
         # Generate a path till the end of the map
-        car.path = Path(
-            the_map.nodes_per_row,
-            the_map.nodes_per_row,
-            (start_x, start_y),
-            (2, 0),
-        )
+        car.path = Path((start_x, start_y), end)
 
         cars.append(car)
         MapController.insert_car(the_map, car)

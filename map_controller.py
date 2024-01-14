@@ -3,6 +3,7 @@ from typing import List
 from model import *
 from car import Car
 from map import Map
+from path import Path
 from intersection import Intersection
 
 
@@ -24,6 +25,11 @@ class MapController:
                 continue
 
             if not car_passed_intersection(car, car.target_intersection.position):
+                continue
+
+            # Test if this is the last intersection
+            if car.path.next_target() == None:
+                # TODO: Remove car from map
                 continue
 
             # Get intersection
@@ -48,29 +54,15 @@ class MapController:
             from_intersection = car.target_intersection
             from_direction = car.direction
             # set up the next car here from the incoming and outgoing shit
-            path = car.path
-            # TODO: This should probably be a path function
-            next_target = path.next_target()
-            destination = None
-            if next_target is None:
-                # Pretend car is just going to continue going straight
-                destination = car.direction
-            else:
-                target = path.target()
-                if target[0] > next_target[0]:
-                    destination = Direction.E
-                elif target[0] < next_target[0]:
-                    destination = Direction.W
-                elif target[1] > next_target[1]:
-                    destination = Direction.N
-                elif target[1] < next_target[1]:
-                    destination = Direction.S
+            path: Path = car.path
+            next_direction = path.next_direction()
+            next_point = path.next_target()
+            # Get and attach next target intersection
+            next_intersection = map.intersection_at_index(next_point[0], next_point[1])
+            car.target_intersection = next_intersection
 
             path.step()
 
-            # Get and attach next target intersection
-            next_intersection = map.next_intersection(from_intersection, destination)
-            car.target_intersection = next_intersection
             # TODO: Update car ahead and behind relations
             # TODO: Update the outgoing and incoming arrays in both interections
             # car.next_intersection.car_passed(car)

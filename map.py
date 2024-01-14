@@ -22,6 +22,9 @@ class Map:
         y_index = int(position[1] / self.road_length)
         return self.intersections[x_index][y_index]
 
+    def intersection_at_index(self, node_x, node_y) -> Intersection:
+        return self.intersections[node_x][node_y]
+
     # TODO: could probably make this simpler and shorter
     # We will use closest_intersection to attach cars to their next intersection
     def closest_intersection(

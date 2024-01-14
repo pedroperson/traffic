@@ -33,7 +33,7 @@ class Direction(Enum):
 
 
 # A map to convert the direction to a tuple of (delta_x, delta_y)
-direction_map: Dict[Direction, Tuple[int, int]] = {
+direction_deltas: Dict[Direction, Tuple[int, int]] = {
     Direction.N: (0, 1),
     Direction.E: (1, 0),
     Direction.S: (0, -1),
