@@ -42,14 +42,13 @@ def print_road(cars: List[Car], whole_length: Meters, map: Map):
                 continue
 
             # Check if there is a car at this position
-            car = None
+            car_count = 0
             for c in cars:
                 if in_x(x, DX, c.position) and in_y(y, DY, c.position):
-                    car = c
-                    break
+                    car_count += 1
 
-            if car:
-                print("@", end="")
+            if car_count > 0:
+                print(str(car_count), end="")
             else:
                 # TODO: Some of them should be empty if they are not roads
                 print(".", end="")
