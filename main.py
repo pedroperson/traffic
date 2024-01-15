@@ -21,7 +21,7 @@ def run_simulation():
     time_steps = 8000  # Total number of time steps for the simulation
     dt: Seconds = 0.02  # Time step duration
     street_length: Meters = 200  # From intersection to intersection
-    nodes_per_row = 9  # Number of intersections per row
+    nodes_per_row = 4  # Number of intersections per row
 
     state = init_test_map(nodes_per_row, street_length)
 
@@ -68,37 +68,29 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
         intersection = the_map.intersection((x, y))
         intersection.set_light(l)
 
-    for i in range(nodes_per_row - 1):
-        new_traffic_light((i + 1) * road_length, 0)
+    for j in range(nodes_per_row - 1):
+        for i in range(nodes_per_row - 1):
+            new_traffic_light((i + 1) * road_length, j * road_length)
 
     # Initialize and place the cars
     cars = []
 
-    def new_car(x, speed):
-        car = Car(x, 0, speed, Direction.E)
+    def new_car(x, y, speed):
+        car = Car(x, y, speed, Direction.E)
+        # TODO: update this to handle any direction
         # Since the direction is East
         start_x = int(car.position[0] / the_map.road_length)
         start_y = int(car.position[1] / the_map.road_length)
-        end = (nodes_per_row - 1, 0)
+        end = (nodes_per_row - 1, 2)
         # Generate a path till the end of the map
         car.path = Path((start_x, start_y), end)
 
         cars.append(car)
         MapController.insert_car(the_map, car)
 
-    new_car(1, 0)
-    new_car(10, 20)
-    new_car(20, 20)
-    new_car(30, 20)
-    new_car(40, 20)
-    new_car(50, 20)
-    new_car(60, 20)
-    new_car(100, 20)
-    new_car(120, 16)
-    new_car(140, 10)
-    new_car(160, 6)
-    new_car(180, 0)
-
+    for j in range(0, 200, road_length):
+        for i in range(0, 200, 10):
+            new_car(i, j, 20)
     # TODO: connect cars that dont have a car ahead to the outgoing in their destination directions
 
     # Return the initial state

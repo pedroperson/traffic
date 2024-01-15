@@ -12,40 +12,56 @@ from car import Car
 def print_road(cars: List[Car], whole_length: Meters, map: Map):
     # Length of each text character
     DX = whole_length / 120
+    DY = whole_length / 10
     ROAD_WIDTH = ceil(whole_length / DX)
+    ROAD_HEIGHT = ceil(whole_length / DY)
 
     # Print the road in a line of text
-    for x in range(ROAD_WIDTH):
-        # Check if there is a car at this position
-        car = None
-        for c in cars:
-            # idk why this actually works
-            if c.position >= (x * DX, 0) and c.position < ((x + 1) * DX, 0):
-                car = c
-                break
-
-        intersection = None
-        for row in map.intersections:
-            for i in row:
-                if i.position[0] >= x * DX and i.position[0] < (x + 1) * DX:
-                    intersection = i
+    for y in range(ROAD_HEIGHT):
+        for x in range(ROAD_WIDTH):
+            intersection = None
+            for row in map.intersections:
+                for intersec in row:
+                    if in_x(x, DX, intersec.position) and in_y(
+                        y, DY, intersec.position
+                    ):
+                        intersection = intersec
+                        break
+                if intersection:
                     break
-            if intersection:
-                break
 
-        if intersection:
-            char = (
-                " "
-                if intersection.light is None
-                else "O"
-                if intersection.light.is_on
-                else "X"
-            )
-            print(char, end="")
-        if car:
-            print("@", end="")
-        else:
-            print(".", end="")
-    print("")
-    sys.stdout.write("\033[F")
-    time.sleep(0.001)
+            if intersection:
+                char = (
+                    " "
+                    if intersection.light is None
+                    else "-"
+                    if intersection.light.is_on
+                    else "|"
+                )
+                print(char, end="")
+                continue
+
+            # Check if there is a car at this position
+            car = None
+            for c in cars:
+                if in_x(x, DX, c.position) and in_y(y, DY, c.position):
+                    car = c
+                    break
+
+            if car:
+                print("@", end="")
+            else:
+                print(".", end="")
+        print("")
+
+    # time.sleep(0.001)
+    for y in range(ROAD_HEIGHT):
+        sys.stdout.write("\033[F")
+
+
+def in_x(x, dx, position):
+    return position[0] >= x * dx and position[0] < (x + 1) * dx
+
+
+def in_y(y, dy, position):
+    return position[1] >= y * dy and position[1] < (y + 1) * dy
