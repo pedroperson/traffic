@@ -11,8 +11,8 @@ from car import Car
 # Assuming 1d horizontal road for now
 def print_road(cars: List[Car], whole_length: Meters, map: Map):
     # Length of each text character
-    DX = whole_length / 120
-    DY = whole_length / 10
+    DX = whole_length / 20
+    DY = whole_length / 20
     ROAD_WIDTH = ceil(whole_length / DX)
     ROAD_HEIGHT = ceil(whole_length / DY)
 
@@ -32,7 +32,7 @@ def print_road(cars: List[Car], whole_length: Meters, map: Map):
 
             if intersection:
                 char = (
-                    " "
+                    "*"
                     if intersection.light is None
                     else "-"
                     if intersection.light.is_on
@@ -51,10 +51,11 @@ def print_road(cars: List[Car], whole_length: Meters, map: Map):
             if car:
                 print("@", end="")
             else:
+                # TODO: Some of them should be empty if they are not roads
                 print(".", end="")
         print("")
 
-    # time.sleep(0.001)
+    # time.sleep(0.1)
     for y in range(ROAD_HEIGHT):
         sys.stdout.write("\033[F")
 

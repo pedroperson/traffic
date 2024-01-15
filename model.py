@@ -23,6 +23,9 @@ SPEED_BUFFER = 3.6  # meters per m/s
 # The minimum distance that must be kept when cars are stopped. This is to simulate the fact that cars are not bumper to bumper when stopped.
 CAR_MIN_DISTANCE = 2  # meters
 
+# We will assume all cars will take a constant amount of time to turn left
+TURN_TIME = Seconds(6)
+
 
 # Simulation is 2D, so we keep cardinal directions
 class Direction(Enum):
