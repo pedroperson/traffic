@@ -41,6 +41,7 @@ class Intersection:
 
         # We interpret the light as green for X if it is on and Y if it is off
         is_green_for_x = self.light.is_on
+
         if my_heading == Direction.E or my_heading == Direction.W:
             return is_green_for_x
         return not is_green_for_x

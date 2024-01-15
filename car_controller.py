@@ -35,9 +35,7 @@ def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
         return True
 
     SAFETY_MARGIN = 2
-    # TODO: actually do math here. now i have the stopping ditance precalculated so it should be easy
-    # Super cop out here using a constant speed buffer
-    # Actually this is really bad because we are not accounting for the fact that the car in front might be slowing down or how fast its going
+    # TODO: actually do math here. We need to consider the speed of the car in front of us, not just some guideline for speed
     safe_distance = behind.speed * SPEED_BUFFER
     return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_MARGIN
 
@@ -56,6 +54,15 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     d = calculate_distance(car.position, intersection.position)
     if d < CAR_MIN_DISTANCE:
         return True
+
+    # Turning left
+    if direction_to_the_left[car.direction] == car.path.next_direction():
+        # TODO: When close enough, Check if needs to slow down for turn
+        # Need the distance to reach the turning speed
+        # If that times some safety factor is less than the distance to the intersection , then we need to slow down
+
+        # TODO: When close enough, need to query intersection to see if there is a car coming from the opposite direction, It should account for our stopping distance
+        _ = 0
 
     SAFETY_MARGIN = 2
 

@@ -3,6 +3,9 @@ from typing import Optional, Any
 from model import Meters, Direction, direction_deltas, CAR_LENGTH, CAR_WIDTH, Point
 
 
+from path import Path
+
+
 # Car should keep the global positioning, vehicle should keep the speed and acceleration stuff
 class Car:
     def __init__(
@@ -36,7 +39,7 @@ class Car:
         # Another reason to keep this out model, : Optional[Intersection]  is the type hint here but we cant use it because of circular imports
         self.target_intersection: Any = None
         # Not really optional, this should be created at init, but not here in this class. Car should not know about the map at all
-        self.path = None
+        self.path: Path = None
 
     def accelerate(self, dt, throttle: float = 1):
         self.speed += self.acceleration * throttle * dt
