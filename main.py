@@ -63,7 +63,7 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
     lights = []
 
     def new_traffic_light(x, y):
-        l = Light(cycle_period=30, proportion_x=0.5)
+        l = Light(cycle_period=60, proportion_x=0.5)
         lights.append(l)
         intersection = the_map.intersection((x, y))
         intersection.set_light(l)
@@ -83,7 +83,7 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
         start_y = int(car.position[1] / the_map.road_length)
         end = (2, nodes_per_row - 2)
         # Generate a path till the end of the map
-        car.path = Path((start_x, start_y), end)
+        car.path = Path((start_x, start_y), end, start_direction=Direction.E)
         # Align car to path
         car.direction = car.path.path_directions[0]
 

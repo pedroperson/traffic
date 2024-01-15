@@ -2,10 +2,19 @@ from math import ceil
 import sys
 import time
 from typing import List
+from enum import Enum
 
 from model import *
 from map import Map
 from car import Car
+
+
+ROAD = "."
+CAR = "@"
+NOTHING = " "
+INTERSECTION = "*"
+LIGHT_ON_X = "-"
+LIGHT_ON_Y = "|"
 
 
 # Assuming 1d horizontal road for now
@@ -16,45 +25,39 @@ def print_road(cars: List[Car], whole_length: Meters, map: Map):
     ROAD_WIDTH = ceil(whole_length / DX)
     ROAD_HEIGHT = ceil(whole_length / DY)
 
-    # Print the road in a line of text
-    for y in range(ROAD_HEIGHT):
-        for x in range(ROAD_WIDTH):
-            intersection = None
-            for row in map.intersections:
-                for intersec in row:
-                    if in_x(x, DX, intersec.position) and in_y(
-                        y, DY, intersec.position
-                    ):
-                        intersection = intersec
-                        break
-                if intersection:
-                    break
+    def horizontal_road(y, dy):
+        s = ""
+        for _ in range(ROAD_WIDTH):
+            s += ROAD
 
-            if intersection:
-                char = (
-                    "*"
-                    if intersection.light is None
-                    else "-"
-                    if intersection.light.is_on
-                    else "|"
-                )
-                print(char, end="")
+        for car in cars:
+            if not in_y(y, dy, car.position):
                 continue
 
-            # Check if there is a car at this position
-            car_count = 0
-            for c in cars:
-                if in_x(x, DX, c.position) and in_y(y, DY, c.position):
-                    car_count += 1
+            x = round(car.position[0] / DX)
+            s = s[:x] + CAR + s[x + 1 :]
 
-            if car_count > 0:
-                print(str(car_count), end="")
-            else:
-                # TODO: Some of them should be empty if they are not roads
-                print(".", end="")
-        print("")
+        for row in map.intersections:
+            for intersec in row:
+                if not in_y(y, dy, intersec.position):
+                    continue
 
-    # time.sleep(0.1)
+                x = round(intersec.position[0] / DX)
+                if intersec.light is None:
+                    s = s[:x] + INTERSECTION + s[x + 1 :]
+                else:
+                    if intersec.light.is_on:
+                        s = s[:x] + LIGHT_ON_X + s[x + 1 :]
+                    else:
+                        s = s[:x] + LIGHT_ON_Y + s[x + 1 :]
+
+        return s
+
+    # Print the road in a line of text
+    for y in range(ROAD_HEIGHT):
+        print(horizontal_road(y, DY))
+
+    time.sleep(0.001)
     for y in range(ROAD_HEIGHT):
         sys.stdout.write("\033[F")
 

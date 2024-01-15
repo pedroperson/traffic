@@ -7,10 +7,23 @@ IndexPoint = Tuple[int, int]
 
 
 class Path:
-    def __init__(self, start: IndexPoint, end: IndexPoint):
+    def __init__(self, start: IndexPoint, end: IndexPoint, start_direction=None):
         # Keep an index to know where we are in the path
         self.index = 0
+
+        if start_direction is not None:
+            start = (
+                start[0] + direction_deltas[start_direction][0],
+                start[1] + direction_deltas[start_direction][1],
+            )
+
         pts, dirs = generate_paths_to_node(start, end)
+
+        # Add the first move in
+        if start_direction is not None:
+            pts.insert(0, start)
+            dirs.insert(0, start_direction)
+
         # Keep a list of points to help find intersections
         self.path = pts
         # Keep a list of directions to help with repositioning

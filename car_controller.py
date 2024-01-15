@@ -4,6 +4,9 @@ from model import *
 from car import Car
 from intersection import Intersection
 
+# We need a concept of a very long time, so we can use it to represent a car that is not turning left
+LIKE_SUPER_LONG = TURN_TIME * 1000
+
 
 class CarController:
     def adjust_speed(
@@ -60,9 +63,11 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
         # TODO: When close enough, Check if needs to slow down for turn
         # Need the distance to reach the turning speed
         # If that times some safety factor is less than the distance to the intersection , then we need to slow down
+        inte: Intersection = car.target_intersection
+        opposing = inte.opposing_car(car.direction)
+        safe_time = time_to_opposing_car_arrival(inte.position, opposing)
 
         # TODO: When close enough, need to query intersection to see if there is a car coming from the opposite direction, It should account for our stopping distance
-        _ = 0
 
     SAFETY_MARGIN = 2
 
@@ -70,9 +75,18 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
 
 
 # HELPER MATH FUNCTIONS
+def time_to_opposing_car_arrival(position, opposing_car: Car) -> Seconds:
+    if opposing_car is None:
+        return LIKE_SUPER_LONG
+
+    # Avoiding a divide by zero error
+    if opposing_car.speed == 0:
+        return LIKE_SUPER_LONG
+
+    distance = calculate_distance(opposing_car.position, position)
+    # IDK: Maybe assuming current speed isn't enough
+    return distance / opposing_car.speed
 
 
-def calculate_distance(point1: Point, point2: Point) -> Meters:
-    x1, y1 = point1
-    x2, y2 = point2
-    return math.hypot(x2 - x1, y2 - y1)
+def calculate_distance(a: Point, b: Point) -> Meters:
+    return math.hypot(b[0] - a[0], b[1] - a[1])
