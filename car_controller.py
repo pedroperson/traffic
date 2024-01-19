@@ -48,10 +48,9 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     if intersection is None:
         return False
 
-    # TODO: Now we need to consider the path we are going, if we are going to turn left right or go straight
-
     # Assuming we are going straight for now
     if intersection.is_green(car.direction):
+        # TODO: Take right turn on red into account
         return False
 
     d = calculate_distance(car.position, intersection.position)
@@ -65,7 +64,10 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
         # If that times some safety factor is less than the distance to the intersection , then we need to slow down
         inte: Intersection = car.target_intersection
         opposing = inte.opposing_car(car.direction)
-        safe_time = time_to_opposing_car_arrival(inte.position, opposing)
+        safe_time = time_to_car_arrival(inte.position, opposing)
+
+        # Take our time to stop into account cus like you know
+        time_to_stop = car.speed / car.deceleration
 
         # TODO: When close enough, need to query intersection to see if there is a car coming from the opposite direction, It should account for our stopping distance
 
@@ -75,17 +77,17 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
 
 
 # HELPER MATH FUNCTIONS
-def time_to_opposing_car_arrival(position, opposing_car: Car) -> Seconds:
-    if opposing_car is None:
+def time_to_car_arrival(position, car: Car) -> Seconds:
+    if car is None:
         return LIKE_SUPER_LONG
 
     # Avoiding a divide by zero error
-    if opposing_car.speed == 0:
+    if car.speed == 0:
         return LIKE_SUPER_LONG
 
-    distance = calculate_distance(opposing_car.position, position)
+    distance = calculate_distance(car.position, position)
     # IDK: Maybe assuming current speed isn't enough
-    return distance / opposing_car.speed
+    return distance / car.speed
 
 
 def calculate_distance(a: Point, b: Point) -> Meters:

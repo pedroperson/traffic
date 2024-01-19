@@ -40,7 +40,6 @@ I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets
 
 ## TODOs
 
-- remove the map knowdge for the car class -> I tried to do this but it requires a higher level of abstraction we dont have yet
 - write better display logic
 - write better versions of the functions at the bottom of map.py
 - map_controller logic is all sorts of bad!
