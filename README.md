@@ -44,5 +44,6 @@ I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets
 - write better display logic
 - write better versions of the functions at the bottom of map.py
 - map_controller logic is all sorts of bad!
+- need yellow lights -> the cars can't stop in time so they are going through red
 
 - test vertical only
