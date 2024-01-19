@@ -46,7 +46,7 @@ def print_road(cars: List[Car], whole_length: Meters, map: Map):
                 if intersec.light is None:
                     s = s[:x] + INTERSECTION + s[x + 1 :]
                 else:
-                    if intersec.light.is_on:
+                    if intersec.is_green(Direction.E):
                         s = s[:x] + LIGHT_ON_X + s[x + 1 :]
                     else:
                         s = s[:x] + LIGHT_ON_Y + s[x + 1 :]
