@@ -14,6 +14,11 @@ Point = Tuple[Meters, Meters]
 # ACCELERATION : For buses, accelerations of up to 1.0 m/s2 helps passengers move naturally inside the vehicle. For cars, a comfortable rate of acceleration is 1.5 to 2.0 m/s2
 # SPEED: Highway speeds in the US are typically around 26.8 m/s (60mph~100kph)
 MAX_SPEED = 27  # m/s
+# Cars need to slow down to turn. google suggests 15 mph -> 6.7 m/s
+TURN_SPEED = 6.7  # m/s
+# For now assume all cars will take a constant amount of time to turn left
+TURN_TIME = Seconds(6)
+
 # LENGTH: American cars range 3.5-5.5 meters in length (mini cooper to for f-150) with a width of 1.5-2 meters
 CAR_LENGTH = Meters(5.2)
 CAR_WIDTH = Meters(1.7)
@@ -22,11 +27,6 @@ SPEED_BUFFER = 3.6  # meters per m/s
 
 # The minimum distance that must be kept when cars are stopped. This is to simulate the fact that cars are not bumper to bumper when stopped.
 CAR_MIN_DISTANCE = Meters(2)
-
-# Cars need to slow down to turn. google suggests 15 mph -> 6.7 m/s
-TURN_SPEED = 6.7  # m/s
-# We will assume all cars will take a constant amount of time to turn left
-TURN_TIME = Seconds(6)
 
 
 # Simulation is 2D, so we keep cardinal directions
