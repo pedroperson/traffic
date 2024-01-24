@@ -7,7 +7,7 @@ from light import Light
 from car import Car
 from map import Map
 from path import Path
-from display import print_road
+from display import Display, print_road
 
 
 class State:
@@ -18,8 +18,8 @@ class State:
 
 
 def run_simulation():
-    time_steps = 8000  # Total number of time steps for the simulation
-    dt: Seconds = 0.01  # Time step duration
+    time_steps = 500  # Total number of time steps for the simulation
+    dt: Seconds = 0.1  # Time step duration
     street_length: Meters = 200  # From intersection to intersection
     nodes_per_row = 5  # Number of intersections per row
 
@@ -27,10 +27,15 @@ def run_simulation():
 
     map_width = street_length * (nodes_per_row - 1)
 
-    for _ in range(time_steps):
-        step(state, dt)
-        print_road(state.cars, map_width, state.the_map)
-        state.current_time += dt
+    display_obj = Display(state.the_map, state.cars, dt)
+
+    display_obj.animate(time_steps)
+
+    # for _ in range(time_steps):
+    #     step(state, dt)
+    #     display_obj.display(state)
+    #     # print_road(state.cars, map_width, state.the_map, 5)
+    #     state.current_time += dt
 
     print("Simulation complete.")
 
@@ -91,7 +96,7 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
         MapController.insert_car(the_map, car)
 
     for j in range(0, 200, road_length):
-        for i in range(0, 200, 10):
+        for i in range(0, 200, 40):
             new_car(i, j, 20)
     # TODO: connect cars that dont have a car ahead to the outgoing in their destination directions
 
