@@ -6,6 +6,7 @@ from intersection import Intersection
 
 # We need a concept of a very long time, so we can use it to represent a car that is not turning left
 LIKE_SUPER_LONG = TURN_TIME * 1000
+SAFETY_FACTOR = 2
 
 
 class CarController:
@@ -37,58 +38,72 @@ def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
     if d < CAR_MIN_DISTANCE:
         return True
 
-    SAFETY_MARGIN = 2
     # TODO: actually do math here. We need to consider the speed of the car in front of us, not just some guideline for speed
     safe_distance = behind.speed * SPEED_BUFFER
-    return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_MARGIN
+    return d - CAR_MIN_DISTANCE <= safe_distance * SAFETY_FACTOR
+
+
+def can_stop_in_time(car: Car, point: Point) -> bool:
+    d = calculate_distance(car.position, point)
+    if d < CAR_MIN_DISTANCE:
+        return False
+    return d - CAR_MIN_DISTANCE > car.stopping_distance() * SAFETY_FACTOR
 
 
 # TODO: needs work
 def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
+    # If there is no next intersection, we are definitely not close it
     if intersection is None:
         return False
 
-    # Assuming we are going straight for now
-    if intersection.is_green(car.direction):
-        # TODO: Take right turn on red into account
+    # Light is red, check if we are too close to intersection
+    if not intersection.is_green(car.direction):
+        return not can_stop_in_time(car, intersection.position)
+
+    # Light is green, turning left
+    if direction_to_the_left[car.direction] == car.path.next_direction():
+        # NEWER THINKING:
+        # Lets assume the light will be green forever and all we have to worry about is us and the opposing car
+
+        # If we even further assume that there is no opposing car, then we just need to worry about us. In that case, to make a turn we need to make sure we are goig to be able to slow down to the turning speed
+        d = calculate_distance(car.position, intersection.position)
+        distance_to_turn_speed = distance_to_slow_down(
+            car.speed, TURN_SPEED, car.deceleration
+        )
+        can_i_slow_down_to_turning_speed = d > distance_to_turn_speed * SAFETY_FACTOR
+        if not can_i_slow_down_to_turning_speed:
+            return True
+
+        opposing = intersection.opposing_car(car.direction)
+        # If i know there is no car incoming, and that we are far enough that we dont need to slow down, then we dont need to slow down
+        if opposing is None:
+            return False
+
+        # ok, now lets consider the opposing car being too close and blocking us
+        # One edge is, what if i go as fast as i can till the intersection, and then I slow down to turning speed-> will the opposing car get the the intersection before that time
+        distance_car_to_intersection = calculate_distance(
+            car.position, intersection.position
+        )
+        distance_to_turn_speed = distance_to_slow_down(
+            car.speed, TURN_SPEED, car.deceleration
+        )
+        distance_in_full_speed = distance_car_to_intersection - distance_to_turn_speed
+        # Assuming constant speed, in future could take acceleration and max speed into account but i dont think it matters much
+        speed = car.speed if car.speed > 0.1 else 0.1
+        time_in_full_speed = distance_in_full_speed / speed
+        time_to_slow = time_to_reach_speed(speed, TURN_SPEED, car.deceleration)
+
+        min_time_to_intersection = (time_in_full_speed + time_to_slow) * SAFETY_FACTOR
+
+        opposing_arrival = time_to_car_arrival(intersection.position, opposing)
+
+        i_can_make_this_turn = min_time_to_intersection + TURN_TIME > opposing_arrival
+        if not i_can_make_this_turn:
+            return True
+
+        # Now, what if we are so far away that we can't make the turn obvious like i dont even care about the opposing car yet, maybe we should do this check before this set of checks
         return False
 
-    d = calculate_distance(car.position, intersection.position)
-    if d < CAR_MIN_DISTANCE:
-        return True
-
-    # Turning left
-    if direction_to_the_left[car.direction] == car.path.next_direction():
-        # THINKING
-        #  a car that curns left wants to stays as fast as possible till the intersectino
-        # getting close it will need to adjust speed to the turning max speed
-        # it may need to slow down further to 0 speed if there is a car incoming or the light turns red
-
-        distance = calculate_distance(car.position, inte.position)
-
-        stopping_distance = car.stopping_distance()
-
-        # IDK maybe we can do a cheap ealy return here since we are so far away
-        if distance > stopping_distance * 4:
-            False
-
-        # If its close enough we might need to adjust the speed
-        # Now we need to worry about other cars
-        inte: Intersection = car.target_intersection
-        opposing = inte.opposing_car(car.direction)
-
-        safety_factor = 1.5
-
-        # The opposing car will reach us in:
-        opposing_arrival = time_to_car_arrival(inte.position, opposing)
-        # So i need(?) to know the minimum and maximum(?) times we will reach the intersection.
-        # The minimum time is we stay at max speed till the minimum time we need to slow down to turn
-        # the maximum is the car of in front us stop forever
-
-        # ok maybe jus the minimum is enough
-        # so maybe we should ask with the current speed?
-
-        # We need to at fucking least slow down for the turn, so lets code that situation
         i_can_fukin_turn_left_whenever = True
         if i_can_fukin_turn_left_whenever is True:
             if car.speed > TURN_SPEED:
@@ -103,33 +118,15 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
         i_can_fNEVER_ukin_turn_left_whenever = True
         if i_can_fNEVER_ukin_turn_left_whenever is True:
             return (
-                distance - CAR_MIN_DISTANCE <= car.stopping_distance() * SAFETY_MARGIN
+                distance - CAR_MIN_DISTANCE <= car.stopping_distance() * safety_factor
             )
-
-        # NOW I NEED THE MIDDLE TERM STUFF
-        #  I need to know when it is that i need to start slowing down
-
-        # TODO: When close enough, Check if needs to slow down for turn
-        # Need the distance to reach the turning speed
-        # If that times some safety factor is less than the distance to the intersection , then we need to slow down
-
-        time_to_intersection = time_to_car_arrival(inte.position, car)
-
-        time_to_stop = car.speed / car.deceleration
-
-        stopping_distance = car.stopping_distance()
-
-        distance = calculate_distance(car.position, inte.position)
-
-        coasting_distance = distance - (stopping_distance * safety_factor)
 
         # Alright, First i need to know how long it will take me to get to the intersection
 
         # TODO: When close enough, need to query intersection to see if there is a car coming from the opposite direction, It should account for our stopping distance
 
-    SAFETY_MARGIN = 2
-
-    return d - CAR_MIN_DISTANCE <= car.stopping_distance() * SAFETY_MARGIN
+    # TODO: Take right turn on red into account
+    return False
 
 
 # HELPER MATH FUNCTIONS
@@ -152,3 +149,7 @@ def calculate_distance(a: Point, b: Point) -> Meters:
 
 def distance_to_slow_down(speed, target_speed, deceleration):
     return (speed**2 - target_speed**2) / (2 * deceleration)
+
+
+def time_to_reach_speed(speed, target_speed, acceleration):
+    return (speed - target_speed) / (acceleration)

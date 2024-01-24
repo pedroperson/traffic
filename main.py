@@ -20,8 +20,8 @@ class State:
 def run_simulation():
     time_steps = 8000  # Total number of time steps for the simulation
     dt: Seconds = 0.01  # Time step duration
-    street_length: Meters = 200  # From intersection to intersection
-    nodes_per_row = 5  # Number of intersections per row
+    street_length: Meters = 100  # From intersection to intersection
+    nodes_per_row = 4  # Number of intersections per row
 
     state = init_test_map(nodes_per_row, street_length)
 
@@ -81,7 +81,7 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
         # ASsuming the direction is East
         start_x = int(car.position[0] / the_map.road_length)
         start_y = int(car.position[1] / the_map.road_length)
-        end = (2, nodes_per_row - 2)
+        end = (3, 0)
         # Generate a path till the end of the map
         car.path = Path((start_x, start_y), end, start_direction=Direction.E)
         # Align car to path
@@ -90,9 +90,10 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
         cars.append(car)
         MapController.insert_car(the_map, car)
 
-    for j in range(0, 200, road_length):
-        for i in range(0, 200, 10):
-            new_car(i, j, 20)
+    # for j in range(0, 200, road_length):
+    j = (nodes_per_row - 2) * road_length
+    for i in range(0, (nodes_per_row - 1) * road_length, 10):
+        new_car(i, j, 20)
     # TODO: connect cars that dont have a car ahead to the outgoing in their destination directions
 
     # Return the initial state

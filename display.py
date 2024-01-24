@@ -20,8 +20,8 @@ LIGHT_ON_Y = "|"
 # Assuming 1d horizontal road for now
 def print_road(cars: List[Car], whole_length: Meters, map: Map):
     # Length of each text character
-    DX = whole_length / 40
-    DY = whole_length / 20
+    DX = whole_length / 30
+    DY = whole_length / 15
     ROAD_WIDTH = ceil(whole_length / DX)
     ROAD_HEIGHT = ceil(whole_length / DY)
 
