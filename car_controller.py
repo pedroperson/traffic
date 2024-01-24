@@ -47,6 +47,7 @@ def can_stop_in_time(car: Car, point: Point, safety_factor) -> bool:
     d = calculate_distance(car.position, point)
     if d < CAR_MIN_DISTANCE:
         return False
+    # delete this comment
     return d - CAR_MIN_DISTANCE > car.stopping_distance() * safety_factor
 
 
