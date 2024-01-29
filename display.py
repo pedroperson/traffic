@@ -19,6 +19,7 @@ NOTHING = " "
 INTERSECTION = "*"
 LIGHT_ON_X = "-"
 LIGHT_ON_Y = "|"
+LIGHT_YELLOW = "Y"
 
 class Display:
     def __init__(self, map: Map, cars: [Car], dt: Seconds):
@@ -107,8 +108,10 @@ def print_road(cars: List[Car], whole_length: Meters, map: Map):
                 else:
                     if intersec.is_green(Direction.E):
                         s = s[:x] + LIGHT_ON_X + s[x + 1 :]
-                    else:
+                    elif intersec.is_green(Direction.N):
                         s = s[:x] + LIGHT_ON_Y + s[x + 1 :]
+                    else:
+                        s = s[:x] + LIGHT_YELLOW + s[x + 1 :]
 
         return s
 
