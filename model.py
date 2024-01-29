@@ -26,6 +26,7 @@ CAR_WIDTH = Meters(1.7)
 SPEED_BUFFER = 3.6  # meters per m/s
 
 # The minimum distance that must be kept when cars are stopped. This is to simulate the fact that cars are not bumper to bumper when stopped.
+  # Santi- This is really here because otherwise you tend to roll over the line and then decide you might as well cross the intersection
 CAR_MIN_DISTANCE = Meters(2)
 
 
@@ -59,3 +60,9 @@ direction_to_the_left = {
     Direction.E: Direction.N,
     Direction.W: Direction.S,
 }
+
+class Lightcolor(Enum):
+    Green   = 0  
+    Yellow  = 1  
+    Red     = 2  
+  
