@@ -46,3 +46,7 @@ I am using the "Black Formatter" extension in VS code to autoformat onsave. Lets
 - need yellow lights -> the cars can't stop in time so they are going through red
 
 - test vertical only
+
+## Maybe today
+
+- How to measure performance ?
