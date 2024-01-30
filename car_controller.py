@@ -29,7 +29,6 @@ def too_fast(car_speed: float, max_speed: Meters) -> bool:
     return car_speed >= max_speed
 
 
-# TODO: NEEDS WORK
 def too_close_to_car_in_front(behind: Car, ahead: Car) -> bool:
     if ahead is None:
         return False
@@ -50,13 +49,12 @@ def can_stop_in_time(car: Car, point: Point, safety_factor) -> bool:
     return d - CAR_MIN_DISTANCE > car.stopping_distance() * safety_factor
 
 
-# TODO: needs work
 def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     # If there is no next intersection, we are definitely not close it
     if intersection is None:
         return False
 
-    # Light is red, check if we are too close to intersection
+    # Light is red OR yellow, check if we are too close to intersection
     if not intersection.is_green(car.direction):
         if can_stop_in_time(car, intersection.position, SAFETY_FACTOR):
             return False
@@ -66,8 +64,11 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
         )
         return i_could_stop_if_i_really_wanted
 
+    turning_left = direction_to_the_left[car.direction] == car.path.next_direction()
+    turning_right = not turning_left and not car.direction == car.path.next_direction()
+
     # Light is green, turning left
-    if direction_to_the_left[car.direction] == car.path.next_direction():
+    if turning_left:
         # NEWER THINKING:
         # We assume the light will be green forever. If it turns red on us and we can't stop we just keep going through
 
@@ -100,7 +101,11 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
         # So finally at this point we know we are not too fast for the turn, but there is a car incoming and we cannot make the turn on time, and can't stop soon enough, so breeak
         return True
 
-    # TODO: Take right turn on red into account
+    # Turning right
+    if turning_right:
+        if should_slow_down_for_turning_speed(car, intersection):
+            return True
+
     return False
 
 
