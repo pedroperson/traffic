@@ -7,7 +7,7 @@ class Light:
         cycle_period: Seconds = 20,
         proportion_x: float = 0.5,
         phase_offset: float = 0,
-        yellow_phase: Seconds = 100,  # time needed to come to rest,   max speed / breaking acceleration
+        yellow_phase: Seconds = 5,  # time needed to come to rest,   max speed / breaking acceleration
     ):
         # Indicates if the light is green for direction X
         self.is_on = True

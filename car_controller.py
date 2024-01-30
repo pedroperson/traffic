@@ -15,14 +15,21 @@ class CarController:
         max_speed: float,
         dt: Seconds,
     ):
-        if (
-            too_fast(car.speed, max_speed)
-            or too_close_to_intersection(car, car.target_intersection)
-            or too_close_to_car_in_front(car, car.car_in_front)
+        if too_fast(car.speed, max_speed):
+            car.brake(dt)
+            return
+
+        if car.target_intersection and too_close_to_intersection(
+            car, car.target_intersection
         ):
             car.brake(dt)
-        else:
-            car.accelerate(dt)
+            return
+
+        if car.car_in_front and too_close_to_car_in_front(car, car.car_in_front):
+            car.brake(dt)
+            return
+
+        car.accelerate(dt)
 
 
 def too_fast(car_speed: float, max_speed: Meters) -> bool:
@@ -54,15 +61,25 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
     if intersection is None:
         return False
 
+    distance_to_intersection = calculate_distance(car.position, intersection.position)
+
     # Light is red OR yellow, check if we are too close to intersection
     if not intersection.is_green(car.direction):
-        if can_stop_in_time(car, intersection.position, SAFETY_FACTOR):
+        # TODO: Allow turning right on red
+
+        # Really the car should just stop here, but if we are super fast nd close to light to a point we can't even stop anymore, we just close our eyes and go through cus life is too short to even care
+        minimum_stopping_distance = car.stopping_distance()
+        # Can't stop anymore, even if we stomp on them breaks
+        if distance_to_intersection < minimum_stopping_distance:
             return False
-        # Check if we really cant slow down in time. If we can't, just go through, whatareyougonnadoaboutit
-        i_could_stop_if_i_really_wanted = can_stop_in_time(
-            car, intersection.position, 0
+
+        print(
+            distance_to_intersection,
+            minimum_stopping_distance * SAFETY_FACTOR,
+            distance_to_intersection < minimum_stopping_distance * SAFETY_FACTOR,
         )
-        return i_could_stop_if_i_really_wanted
+        # We are close enough to have to worry about stopping but still close enough to stop
+        return distance_to_intersection <= minimum_stopping_distance * SAFETY_FACTOR
 
     turning_left = direction_to_the_left[car.direction] == car.path.next_direction()
     turning_right = not turning_left and not car.direction == car.path.next_direction()
@@ -111,16 +128,11 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
 
 # HELPER MATH FUNCTIONS
 def time_to_car_arrival(position, car: Car) -> Seconds:
-    if car is None:
-        return LIKE_SUPER_LONG
-
-    # Avoiding a divide by zero error
-    if car.speed == 0:
-        return LIKE_SUPER_LONG
-
     distance = calculate_distance(car.position, position)
-    # IDK: Maybe assuming current speed isn't enough
-    return distance / car.speed
+    # Avoiding a divide by zero error
+    speed = car.speed if car.speed > 0.1 else 0.1
+    # IDK: Maybe assuming current speed isn't enough, maybe the max speed needs to be taken into account
+    return distance / speed
 
 
 def calculate_distance(a: Point, b: Point) -> Meters:
@@ -141,14 +153,16 @@ def should_slow_down_for_turning_speed(car: Car, intersection: Intersection) -> 
     return d <= distance_to_turn_speed * SAFETY_FACTOR
 
 
-# What if I go as fast as I can till the intersection, and then I slow down to turning speed-> will the opposing car get the the intersection before that time and the time for me to cross the intersection?
-def min_time_to_intersection(car: Car, intersection: Intersection):
+# What if I go as fast as I can till the intersection, and then I slow down to turning speed
+def min_time_to_intersection(car: Car, intersection: Intersection) -> Seconds:
     distance_car_to_intersection = calculate_distance(
         car.position, intersection.position
     )
-    # we are going to slow down at some point to turning speed so we assume current speed here but maybe it should be max_speed even
+    # we are going to slow down at some point to turning speed
+    # IDK: assuming current speed here but maybe it should be max_speed even
     distance_to_turn_speed = distance_to_slow_down(car, TURN_SPEED)
-    # Now we need to calculate the time we have left going at out current speed
+
+    # Now we need to calculate the distance we have left before having to slow down for the turn
     distance_in_full_speed = distance_car_to_intersection - distance_to_turn_speed
     # Assuming constant speed, in future could take acceleration and max speed into account but i dont think it matters much
     speed = car.speed if car.speed > 0.1 else 0.1
