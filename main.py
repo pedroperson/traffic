@@ -27,15 +27,15 @@ def run_simulation():
 
     map_width = street_length * (nodes_per_row - 1)
 
-    display_obj = Display(state.the_map, state.cars, dt)
+    # display_obj = Display(state.the_map, state.cars, dt)
 
-    display_obj.animate(time_steps)
+    # display_obj.animate(time_steps)
 
-    # for _ in range(time_steps):
-    #     step(state, dt)
-    #     display_obj.display(state)
-    #     # print_road(state.cars, map_width, state.the_map, 5)
-    #     state.current_time += dt
+    for _ in range(time_steps):
+        step(state, dt)
+        # display_obj.display(state)
+        print_road(state.cars, map_width, state.the_map)
+        state.current_time += dt
 
     print("Simulation complete.")
 
@@ -104,7 +104,7 @@ def init_test_map(nodes_per_row: int, road_length: Meters) -> State:
     state = State()
     state.the_map = the_map
     state.cars = cars
-    state.lights = lights 
+    state.lights = lights
     state.current_time = 0
     return state
 

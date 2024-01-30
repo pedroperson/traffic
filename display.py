@@ -21,6 +21,7 @@ LIGHT_ON_X = "-"
 LIGHT_ON_Y = "|"
 LIGHT_YELLOW = "Y"
 
+
 class Display:
     def __init__(self, map: Map, cars: [Car], dt: Seconds):
         self.a_map = map
@@ -43,39 +44,49 @@ class Display:
         self.state.current_time += self.dt
 
     def add_car(self, car: Car):
-
         # Plot the car
-        self.ax.scatter(car.position[0], car.position[1], color='black')
+        self.ax.scatter(car.position[0], car.position[1], color="black")
 
         # Set the x and y self.axis labels
-        self.ax.set_xlabel('X')
-        self.ax.set_ylabel('Y')
+        self.ax.set_xlabel("X")
+        self.ax.set_ylabel("Y")
 
         # Set the title
-        self.ax.set_title('Car')
+        self.ax.set_title("Car")
 
     def add_map(self):
         # Plot the intersections and roads
         for i, row in enumerate(self.a_map.intersections):
             for j, intersection in enumerate(row):
-                self.ax.scatter(intersection.position[0], intersection.position[1], color='blue')
+                self.ax.scatter(
+                    intersection.position[0], intersection.position[1], color="blue"
+                )
 
                 # Plot the road to the right
                 if j < self.a_map.nodes_per_row - 1:
                     next_intersection = self.a_map.intersections[i][j + 1]
-                    self.ax.plot([intersection.position[0], next_intersection.position[0]], [intersection.position[1], next_intersection.position[1]], color='black')
+                    self.ax.plot(
+                        [intersection.position[0], next_intersection.position[0]],
+                        [intersection.position[1], next_intersection.position[1]],
+                        color="black",
+                    )
 
                 # Plot the road below
                 if i < self.a_map.nodes_per_row - 1:
                     next_intersection = self.a_map.intersections[i + 1][j]
-                    self.ax.plot([intersection.position[0], next_intersection.position[0]], [intersection.position[1], next_intersection.position[1]], color='black')
+                    self.ax.plot(
+                        [intersection.position[0], next_intersection.position[0]],
+                        [intersection.position[1], next_intersection.position[1]],
+                        color="black",
+                    )
 
         # Set the x and y self.axis labels
-        self.ax.set_xlabel('X')
-        self.ax.set_ylabel('Y')
+        self.ax.set_xlabel("X")
+        self.ax.set_ylabel("Y")
 
         # Set the title
-        self.ax.set_title('Map')
+        self.ax.set_title("Map")
+
 
 # Assuming 1d horizontal road for now
 def print_road(cars: List[Car], whole_length: Meters, map: Map):
@@ -119,7 +130,7 @@ def print_road(cars: List[Car], whole_length: Meters, map: Map):
     for y in range(ROAD_HEIGHT):
         print(horizontal_road(y, DY))
 
-    time.sleep(0.001)
+    time.sleep(0.005)
     for y in range(ROAD_HEIGHT):
         sys.stdout.write("\033[F")
 
