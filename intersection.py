@@ -36,17 +36,9 @@ class Intersection:
         if self.light is None:
             return True
 
-        # We interpret the light as green for X if it is on and Y if it is off
-        is_green_for_x = self.light.x_light is Lightcolor.Green
-        is_green_for_y = self.light.y_light is Lightcolor.Green
-
-        # print(self.light.x_light, Lightcolor.Green)
-        # print(is_green_for_x, is_green_for_y)
-
         if my_heading == Direction.E or my_heading == Direction.W:
-            return is_green_for_x
-        return is_green_for_y
-
+            return self.light.x_light is Lightcolor.Green
+        return self.light.y_light is Lightcolor.Green
 
     def opposing_car(self, my_heading: Direction):
         return self.incoming_car[my_heading]

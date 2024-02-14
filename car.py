@@ -30,6 +30,8 @@ class Car:
         self.acceleration = acceleration
         self.deceleration = deceleration
 
+        self.braking = False
+
         # TODO: move this knowledge away from the car, it belongs in the controller or higher
 
         # The car behind me: keep this reference to tell the intersection to track that once I have passed
@@ -42,9 +44,13 @@ class Car:
         self.path: Path = None
 
     def accelerate(self, dt, throttle: float = 1):
+        self.braking = False
+
         self.speed += self.acceleration * throttle * dt
 
     def brake(self, dt, throttle: float = 1):
+        self.braking = True
+
         self.speed -= self.deceleration * throttle * dt
         if self.speed < 0:
             self.speed = 0

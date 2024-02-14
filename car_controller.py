@@ -7,6 +7,7 @@ from intersection import Intersection
 # We need a concept of a very long time, so we can use it to represent a car that is not turning left
 LIKE_SUPER_LONG = TURN_TIME * 1000
 SAFETY_FACTOR = 2
+INTERSECTION_WIDTH = 20
 
 
 class CarController:
@@ -74,7 +75,10 @@ def too_close_to_intersection(car: Car, intersection: Intersection) -> bool:
             return False
 
         # We are close enough to have to worry about stopping but still close enough to stop
-        return distance_to_intersection <= minimum_stopping_distance * SAFETY_FACTOR
+        return (
+            distance_to_intersection - INTERSECTION_WIDTH
+            <= minimum_stopping_distance * SAFETY_FACTOR
+        )
 
     turning_left = direction_to_the_left[car.direction] == car.path.next_direction()
     turning_right = not turning_left and not car.direction == car.path.next_direction()

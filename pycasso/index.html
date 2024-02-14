@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Pycasso</title>
+  </head>
+  <body>
+    <canvas width="150" height="150" style="border: 2px solid red"></canvas>
+
+    <script>
+      var ws = new WebSocket("ws://localhost:3001");
+      ws.onopen = function () {
+        console.log("Connected to server");
+      };
+      ws.onmessage = function (event) {
+        console.log("Message received: " + event.data);
+        // Parse the incoming message
+        var commands = event.data.split("\n");
+        commands.forEach(function (command) {
+          // Find the index of the first occurrence of ":"
+          var separatorIndex = command.indexOf(":");
+          if (separatorIndex === -1) {
+            console.log("Invalid command format", command);
+            return; // Skip this command if the format is invalid
+          }
+
+          // Extract the function name and arguments based on the index
+          var functionName = command.substring(0, separatorIndex);
+          var args = command.substring(separatorIndex + 1).split(";");
+
+          // Execute the command
+          executeCanvasCommand(functionName, args);
+          // console.log("command", command);
+          // console.log("RESIZE!", args);
+          // window.alert(command);
+          // asijndfjoasdjfo;
+        });
+      };
+      ws.onclose = function () {
+        console.log("Disconnected from server");
+      };
+    </script>
+
+    <script>
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+
+      function executeCanvasCommand(functionName, args) {
+        switch (functionName) {
+          case "resize":
+            canvas.setAttribute("width", args[0]);
+            canvas.setAttribute("height", args[1]);
+
+            canvas.style.width = args[0];
+            canvas.style.height = args[1];
+
+            adfaf;
+            break;
+          case "clear":
+            ctx.clearRect(...args.map(Number));
+            break;
+          case "fillStyle":
+            ctx.fillStyle = args.join("");
+            break;
+          case "fillRect":
+            ctx.fillRect(...args.map(Number));
+            break;
+          default:
+            console.log("Unknown command: " + functionName);
+        }
+      }
+    </script>
+  </body>
+</html>
