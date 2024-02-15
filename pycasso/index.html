@@ -28,6 +28,84 @@
     </script>
 
     <script>
+      class CircularBufferArray {
+        constructor(maxSize) {
+          this.maxSize = maxSize;
+          this.buffer = new Array(maxSize).fill(null);
+          this.head = 0;
+          this.tail = 0;
+          this.readIndex = null; // Updated to be null initially
+          this.isFull = false;
+          this.untouched = true;
+        }
+
+        push(item) {
+          // If readIndex is null or points to the current tail (which will be overwritten),
+          // set it to head (the next oldest data after push) to ensure we start reading from the oldest data.
+          if (this.readIndex === null) {
+            this.readIndex = this.head;
+          } else if (this.readIndex === this.tail) {
+            this.readIndex += 1;
+          }
+
+          if (!this.untouched && this.tail === this.head) {
+            this.isFull = true;
+            this.head = (this.head + 1) % this.maxSize; // Move head forward when buffer is full
+          }
+
+          this.untouched = false;
+          this.buffer[this.tail] = item;
+          this.tail = (this.tail + 1) % this.maxSize;
+        }
+
+        read() {
+          if (this.readIndex === null) {
+            return null; // or adjust based on preferred behavior for empty reads
+          }
+
+          const item = this.buffer[this.readIndex];
+
+          // No automatic advance of readIndex here; use advanceReadIndex for manual control
+          return item;
+        }
+
+        advanceReadIndex(steps = 1) {
+          if (this.readIndex === null) this.readIndex = this.head; // Start reading from the oldest data if not started yet.
+
+          // steps = steps % this.maxSize; // Ensure steps is within buffer size.
+
+          // Calculate the total available items from readIndex to tail.
+          const tail =
+            this.readIndex >= this.tail ? this.tail + this.maxSize : this.tail;
+
+          const totalAvailable = tail - this.readIndex - 1;
+          steps = Math.min(steps, totalAvailable);
+
+          this.readIndex = (this.readIndex + steps) % this.maxSize;
+        }
+
+        rewindReadIndex(steps = 1) {
+          if (this.readIndex === null)
+            this.readIndex = (this.tail - 1 + this.maxSize) % this.maxSize; // Start from the newest if reading hasn't started.
+
+          // Calculate the total available items from readIndex to tail.
+          const head =
+            this.readIndex < this.head ? this.head - this.maxSize : this.head;
+
+          const totalAvailable = this.readIndex - head;
+          steps = Math.min(steps, totalAvailable);
+
+          this.readIndex =
+            (this.readIndex - steps + this.maxSize) % this.maxSize;
+        }
+
+        isEmpty() {
+          return !this.isFull && this.head === this.tail;
+        }
+      }
+    </script>
+
+    <script>
       const canvas = document.querySelector("canvas");
       const ctx = canvas.getContext("2d");
 
