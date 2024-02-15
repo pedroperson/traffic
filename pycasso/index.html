@@ -6,6 +6,10 @@
   <body>
     <canvas width="150" height="150" style="border: 2px solid red"></canvas>
 
+    <div>
+      <button onclick="BUFFER.rewindReadIndex(40)">rewind</button>
+      <button onclick="BUFFER.advanceReadIndex(40)">forward</button>
+    </div>
     <script>
       var ws = new WebSocket("ws://localhost:3001");
       ws.onopen = function () {
@@ -40,6 +44,7 @@
         push(item) {
           // If readIndex is null or points to the current tail (which will be overwritten),
           // set it to head (the next oldest data after push) to ensure we start reading from the oldest data.
+
           if (this.readIndex === null) {
             this.readIndex = this.head;
           } else if (this.readIndex === this.tail) {
@@ -122,11 +127,15 @@
       animate();
 
       function animate() {
-        if (LATEST_MESSAGE_ID !== BUFFER.readIndex) {
+        // if (LATEST_MESSAGE_ID !== BUFFER.readIndex) {
+        const m = BUFFER.read();
+        console.log("Drawing message: ", m);
+        if (m) {
           LATEST_MESSAGE_ID = BUFFER.readIndex;
-          parseAndDraw(BUFFER.read());
+          parseAndDraw(m);
           BUFFER.advanceReadIndex(1);
         }
+        // }
 
         requestAnimationFrame(animate);
       }
