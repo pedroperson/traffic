@@ -12,15 +12,13 @@
         console.log("Connected to server");
       };
       ws.onmessage = function (event) {
-        // console.log("Message received: " + event.data);
-        // Parse the incoming message
-        LATEST_MESSAGE = event.data;
-        MESSAGE_ID++;
-
         // Immediately draw the latest message for messages that edit the page
-        if (LATEST_MESSAGE.startsWith("resize")) {
-          parseAndDraw(LATEST_MESSAGE);
+        if (event.data.startsWith("resize")) {
+          parseAndDraw(event.data);
+          return;
         }
+        // Store normal drawing messages in the buffer
+        BUFFER.push(event.data);
       };
       ws.onclose = function () {
         console.log("Disconnected from server");
@@ -45,7 +43,7 @@
           if (this.readIndex === null) {
             this.readIndex = this.head;
           } else if (this.readIndex === this.tail) {
-            this.readIndex += 1;
+            this.readIndex = (this.readIndex + 1) % this.maxSize;
           }
 
           if (!this.untouched && this.tail === this.head) {
@@ -59,8 +57,17 @@
         }
 
         read() {
+          console.log(
+            "this.untouched",
+            this.untouched,
+            "this.readIndex",
+            this.readIndex,
+            this.buffer[this.readIndex]
+          );
+          if (this.untouched) return null;
+
           if (this.readIndex === null) {
-            return null; // or adjust based on preferred behavior for empty reads
+            this.readIndex = this.head;
           }
 
           const item = this.buffer[this.readIndex];
@@ -109,14 +116,16 @@
       const canvas = document.querySelector("canvas");
       const ctx = canvas.getContext("2d");
 
-      let LATEST_MESSAGE = "";
-      let MESSAGE_ID = 0;
+      const BUFFER = new CircularBufferArray(1000);
+
       let LATEST_MESSAGE_ID = -1;
       animate();
 
       function animate() {
-        if (LATEST_MESSAGE_ID !== MESSAGE_ID) {
-          parseAndDraw(LATEST_MESSAGE);
+        if (LATEST_MESSAGE_ID !== BUFFER.readIndex) {
+          LATEST_MESSAGE_ID = BUFFER.readIndex;
+          parseAndDraw(BUFFER.read());
+          BUFFER.advanceReadIndex(1);
         }
 
         requestAnimationFrame(animate);
@@ -140,7 +149,8 @@
       }
 
       function parseAndDraw(msg) {
-        if (msg === "") return;
+        console.log("Drawing message: ", msg);
+        if (!msg) return;
 
         var commands = parseMessage(msg);
 
