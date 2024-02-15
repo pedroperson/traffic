@@ -62,13 +62,6 @@
         }
 
         read() {
-          console.log(
-            "this.untouched",
-            this.untouched,
-            "this.readIndex",
-            this.readIndex,
-            this.buffer[this.readIndex]
-          );
           if (this.untouched) return null;
 
           if (this.readIndex === null) {
@@ -129,7 +122,6 @@
       function animate() {
         // if (LATEST_MESSAGE_ID !== BUFFER.readIndex) {
         const m = BUFFER.read();
-        console.log("Drawing message: ", m);
         if (m) {
           LATEST_MESSAGE_ID = BUFFER.readIndex;
           parseAndDraw(m);
@@ -158,7 +150,6 @@
       }
 
       function parseAndDraw(msg) {
-        console.log("Drawing message: ", msg);
         if (!msg) return;
 
         var commands = parseMessage(msg);
