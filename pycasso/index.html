@@ -12,10 +12,40 @@
         console.log("Connected to server");
       };
       ws.onmessage = function (event) {
-        console.log("Message received: " + event.data);
+        // console.log("Message received: " + event.data);
         // Parse the incoming message
-        var commands = event.data.split("\n");
-        commands.forEach(function (command) {
+        LATEST_MESSAGE = event.data;
+        MESSAGE_ID++;
+
+        // Immediately draw the latest message for messages that edit the page
+        if (LATEST_MESSAGE.startsWith("resize")) {
+          parseAndDraw(LATEST_MESSAGE);
+        }
+      };
+      ws.onclose = function () {
+        console.log("Disconnected from server");
+      };
+    </script>
+
+    <script>
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+
+      let LATEST_MESSAGE = "";
+      let MESSAGE_ID = 0;
+      let LATEST_MESSAGE_ID = -1;
+      animate();
+
+      function animate() {
+        if (LATEST_MESSAGE_ID !== MESSAGE_ID) {
+          parseAndDraw(LATEST_MESSAGE);
+        }
+
+        requestAnimationFrame(animate);
+      }
+
+      function parseMessage(message) {
+        return message.split("\n").map((command) => {
           // Find the index of the first occurrence of ":"
           var separatorIndex = command.indexOf(":");
           if (separatorIndex === -1) {
@@ -27,22 +57,19 @@
           var functionName = command.substring(0, separatorIndex);
           var args = command.substring(separatorIndex + 1).split(";");
 
-          // Execute the command
-          executeCanvasCommand(functionName, args);
-          // console.log("command", command);
-          // console.log("RESIZE!", args);
-          // window.alert(command);
-          // asijndfjoasdjfo;
+          return { functionName, args };
         });
-      };
-      ws.onclose = function () {
-        console.log("Disconnected from server");
-      };
-    </script>
+      }
 
-    <script>
-      const canvas = document.querySelector("canvas");
-      const ctx = canvas.getContext("2d");
+      function parseAndDraw(msg) {
+        if (msg === "") return;
+
+        var commands = parseMessage(msg);
+
+        commands.forEach(function ({ functionName, args }) {
+          executeCanvasCommand(functionName, args);
+        });
+      }
 
       function executeCanvasCommand(functionName, args) {
         switch (functionName) {
@@ -52,8 +79,6 @@
 
             canvas.style.width = args[0];
             canvas.style.height = args[1];
-
-            adfaf;
             break;
           case "clear":
             ctx.clearRect(...args.map(Number));

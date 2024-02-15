@@ -95,4 +95,4 @@ def draw_state(pycasso, cars: List[Car], whole_length: Meters, map: Map):
 
     pycasso.draw()
 
-    sleep(0.01)
+    sleep(1 / 60)
