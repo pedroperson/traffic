@@ -71,9 +71,9 @@ def draw_state(pycasso, cars: List[Car], whole_length: Meters, map: Map):
 
     for car in cars:
         if car.braking:
-            pycasso.fillStyle("rgb(100 10 10)")
+            pycasso.fillStyle("rgb(200 10 50)")
         else:
-            pycasso.fillStyle("rgb(0 0 250)")
+            pycasso.fillStyle("rgb(100 100 254)")
 
         x = round(car.position[0] * DX)
         y = round(car.position[1] * DY)
@@ -95,4 +95,4 @@ def draw_state(pycasso, cars: List[Car], whole_length: Meters, map: Map):
 
     pycasso.draw()
 
-    sleep(0.01)
+    sleep(1 / 60)
