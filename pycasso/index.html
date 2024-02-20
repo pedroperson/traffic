@@ -11,32 +11,23 @@
       <button onclick="BUFFER.advanceReadIndex(40)">forward</button>
     </div>
     <script>
-      var ws = new WebSocket("ws://localhost:3001");
-      ws.onopen = function () {
-        console.log("Connected to server");
-      };
-      ws.onmessage = function (event) {
-        // Immediately draw the latest message for messages that edit the page
-        if (event.data.startsWith("resize")) {
-          parseAndDraw(event.data);
-          return;
+      class WebSocketReceiver {
+        constructor(url, onMessage) {
+          this.ws = new WebSocket(url);
+          this.ws.onmessage = (event) => onMessage(event.data);
         }
-        // Store normal drawing messages in the buffer
-        BUFFER.push(event.data);
-      };
-      ws.onclose = function () {
-        console.log("Disconnected from server");
-      };
+      }
     </script>
 
     <script>
+      // CircularBufferArray is a fixed-sized array implementation that overwrites the oldest data when full. This is useful for retaining a maximum number of drawing instructions, while avoiding excessive array manipulation.
       class CircularBufferArray {
         constructor(maxSize) {
           this.maxSize = maxSize;
           this.buffer = new Array(maxSize).fill(null);
           this.head = 0;
           this.tail = 0;
-          this.readIndex = null; // Updated to be null initially
+          this.readIndex = null;
           this.isFull = false;
           this.untouched = true;
         }
@@ -53,7 +44,8 @@
 
           if (!this.untouched && this.tail === this.head) {
             this.isFull = true;
-            this.head = (this.head + 1) % this.maxSize; // Move head forward when buffer is full
+            // Move head forward when buffer is full
+            this.head = (this.head + 1) % this.maxSize;
           }
 
           this.untouched = false;
@@ -68,16 +60,12 @@
             this.readIndex = this.head;
           }
 
-          const item = this.buffer[this.readIndex];
-
-          // No automatic advance of readIndex here; use advanceReadIndex for manual control
-          return item;
+          return this.buffer[this.readIndex];
         }
 
         advanceReadIndex(steps = 1) {
-          if (this.readIndex === null) this.readIndex = this.head; // Start reading from the oldest data if not started yet.
-
-          // steps = steps % this.maxSize; // Ensure steps is within buffer size.
+          // Start reading from the oldest data if not started yet.
+          if (this.readIndex === null) this.readIndex = this.head;
 
           // Calculate the total available items from readIndex to tail.
           const tail =
@@ -91,7 +79,8 @@
 
         rewindReadIndex(steps = 1) {
           if (this.readIndex === null)
-            this.readIndex = (this.tail - 1 + this.maxSize) % this.maxSize; // Start from the newest if reading hasn't started.
+            // Start from the newest if reading hasn't started.
+            this.readIndex = (this.tail - 1 + this.maxSize) % this.maxSize;
 
           // Calculate the total available items from readIndex to tail.
           const head =
@@ -111,25 +100,14 @@
     </script>
 
     <script>
-      const canvas = document.querySelector("canvas");
-      const ctx = canvas.getContext("2d");
-
-      const BUFFER = new CircularBufferArray(1000);
-
-      let LATEST_MESSAGE_ID = -1;
-      animate();
-
-      function animate() {
-        // if (LATEST_MESSAGE_ID !== BUFFER.readIndex) {
-        const m = BUFFER.read();
-        if (m) {
-          LATEST_MESSAGE_ID = BUFFER.readIndex;
-          parseAndDraw(m);
-          BUFFER.advanceReadIndex(1);
+      function animate(buffer) {
+        const message = buffer.read();
+        if (message) {
+          parseAndExecuteCommands(message);
+          buffer.advanceReadIndex(1);
         }
-        // }
 
-        requestAnimationFrame(animate);
+        requestAnimationFrame(() => animate(buffer));
       }
 
       function parseMessage(message) {
@@ -137,8 +115,8 @@
           // Find the index of the first occurrence of ":"
           var separatorIndex = command.indexOf(":");
           if (separatorIndex === -1) {
-            console.log("Invalid command format", command);
-            return; // Skip this command if the format is invalid
+            console.error("Invalid command format", command);
+            return;
           }
 
           // Extract the function name and arguments based on the index
@@ -149,7 +127,7 @@
         });
       }
 
-      function parseAndDraw(msg) {
+      function parseAndExecuteCommands(msg) {
         if (!msg) return;
 
         var commands = parseMessage(msg);
@@ -181,6 +159,24 @@
             console.log("Unknown command: " + functionName);
         }
       }
+    </script>
+    <script>
+      const canvas = document.querySelector("canvas");
+      const ctx = canvas.getContext("2d");
+
+      const BUFFER = new CircularBufferArray(1000);
+
+      var ws = new WebSocketReceiver("ws://localhost:3001", (message) => {
+        const isDrawingInstruction = !message.startsWith("resize");
+        if (isDrawingInstruction) {
+          BUFFER.push(message);
+          return;
+        }
+
+        parseAndExecuteCommands(message);
+      });
+
+      animate(BUFFER);
     </script>
   </body>
 </html>
