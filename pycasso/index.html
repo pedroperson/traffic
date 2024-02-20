@@ -164,7 +164,7 @@
       const canvas = document.querySelector("canvas");
       const ctx = canvas.getContext("2d");
 
-      const BUFFER = new CircularBufferArray(1000);
+      const BUFFER = new CircularBufferArray(10000);
 
       var ws = new WebSocketReceiver("ws://localhost:3001", (message) => {
         const isDrawingInstruction = !message.startsWith("resize");

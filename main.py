@@ -23,7 +23,7 @@ def run_simulation():
 
     pycasso = Pycasso(400, 400)
 
-    time_steps = 200000  # Total number of time steps for the simulation
+    time_steps = 2000  # Total number of time steps for the simulation
     dt: Seconds = 0.1  # Time step duration
     street_length: Meters = 100  # From intersection to intersection
     nodes_per_row = 5  # Number of intersections per row
